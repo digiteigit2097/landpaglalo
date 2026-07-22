@@ -12,7 +12,26 @@ const ALTURA = 2480;
 function WhatsAppIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
-      <path d="M12.04 2c-5.46 0-9.9 4.44-9.9 9.9 0 1.75.46 3.45 1.32 4.95L2 22l5.3-1.39a9.87 9.87 0 0 0 4.74 1.21c5.46 0 9.9-4.44 9.9-9.9S17.5 2 12.04 2Zm0 18.1c-1.48 0-2.94-.4-4.2-1.15l-.3-.18-3.13.82.84-3.06-.2-.31a8.26 8.26 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.25-8.24 4.54 0 8.24 3.7 8.24 8.24 0 4.55-3.7 8.25-8.24 8.25Zm4.52-6.16c-.25-.13-1.47-.72-1.7-.8-.22-.09-.39-.13-.55.12-.17.25-.64.8-.78.97-.15.17-.29.19-.54.06-.25-.12-1.05-.38-2-1.23-.73-.66-1.23-1.47-1.38-1.72-.14-.25 0-.38.11-.51.11-.11.25-.29.37-.43.12-.14.16-.25.25-.41.08-.17.04-.31-.02-.43-.06-.13-.55-1.34-.76-1.84-.2-.48-.4-.42-.55-.42h-.47c-.17 0-.43.06-.66.31-.22.25-.86.85-.86 2.07 0 1.22.89 2.4 1.01 2.56.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.6.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.15-1.18-.06-.1-.23-.16-.48-.29Z" />
+      <path d="M17.5 14.4c-.3-.15-1.77-.87-2.04-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51-.17 0-.37-.02-.57-.02-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.48 0 1.46 1.07 2.87 1.22 3.07.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.63.71.23 1.36.19 1.87.12.57-.09 1.77-.72 2.02-1.42.25-.7.25-1.3.17-1.42-.07-.12-.27-.2-.57-.35z" />
+      <path d="M12 2C6.48 2 2 6.48 2 12c0 1.77.46 3.45 1.28 4.93L2 22l5.2-1.36A9.9 9.9 0 0 0 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2zm0 18.2c-1.55 0-3.06-.42-4.38-1.2l-.31-.19-3.09.81.82-3.01-.2-.32A8.16 8.16 0 0 1 3.8 12c0-4.52 3.68-8.2 8.2-8.2s8.2 3.68 8.2 8.2-3.68 8.2-8.2 8.2z" />
+    </svg>
+  );
+}
+
+function TruckIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <path d="M5 18V9a2 2 0 0 1 2-2h6l3 4h1a2 2 0 0 1 2 2v5" />
+      <circle cx="7.5" cy="18" r="1.8" />
+      <circle cx="16.5" cy="18" r="1.8" />
     </svg>
   );
 }
@@ -37,7 +56,7 @@ function ItemCheese({ produto }: { produto: Produto }) {
       preco: produto.preco,
     };
   return (
-    <div className="mb-[1px]">
+    <div className="mb-[3.5px]">
       <div className="flex items-baseline justify-between gap-1">
         <p className="text-[9px] font-bold leading-tight text-marinho">
           {produto.nome}
@@ -60,7 +79,12 @@ function ItemCheese({ produto }: { produto: Produto }) {
 function ItemSimples({ produto }: { produto: Produto }) {
   const alt = variacaoAlternativa(produto);
   return (
-    <div className="mb-[1px]">
+    <div className="mb-[3.5px]">
+      {alt && (
+        <p className="text-right text-[6px] font-extrabold uppercase tracking-wide text-marinho">
+          Normal <span className="text-marinho/40">/</span> Artesanal
+        </p>
+      )}
       <div className="flex items-baseline justify-between gap-1">
         <p className="text-[9px] font-bold leading-tight text-marinho">
           {produto.nome}
@@ -86,7 +110,7 @@ function ItemSimples({ produto }: { produto: Produto }) {
 
 function TituloSecao({ children }: { children: React.ReactNode }) {
   return (
-    <h3 className="mb-[4px] inline-block rounded-[3px] bg-marinho px-[6px] py-[1px] text-[9px] font-extrabold uppercase tracking-wide text-amarelo">
+    <h3 className="mb-[7px] inline-block rounded-[3px] bg-marinho px-[7px] py-[1.5px] text-[9px] font-extrabold uppercase tracking-wide text-amarelo">
       {children}
     </h3>
   );
@@ -138,8 +162,13 @@ function RenderBloco({ bloco }: { bloco: Bloco }) {
   if (bloco.tipo === "categoria") {
     const ehCheese = bloco.categoria.nome === "Cheese";
     return (
-      <section className="mb-[4px]">
+      <section className="mb-[8px]">
         <TituloSecao>{bloco.categoria.nome}</TituloSecao>
+        {ehCheese && (
+          <p className="mb-[3px] text-right text-[6px] font-extrabold uppercase tracking-wide text-marinho">
+            Normal <span className="text-marinho/40">/</span> Artesanal
+          </p>
+        )}
         <div>
           {bloco.categoria.produtos.map((p) =>
             ehCheese ? (
@@ -153,13 +182,13 @@ function RenderBloco({ bloco }: { bloco: Bloco }) {
     );
   }
   return (
-    <section className="mb-[4px]">
+    <section className="mb-[8px]">
       <TituloSecao>Opcionais</TituloSecao>
       <div>
         {bloco.itens.map((o) => (
           <div
             key={o.id}
-            className="mb-[1px] flex items-baseline justify-between gap-1"
+            className="mb-[3px] flex items-baseline justify-between gap-1"
           >
             <p className="text-[8px] font-semibold text-marinho">{o.nome}</p>
             <p className="shrink-0 text-[8px] font-bold tabular-nums text-vermelho-texto">
@@ -190,27 +219,41 @@ export default function CardapioImpresso({
     if (!node) return;
     setGerandoPng(true);
     setErro(null);
+
+    // largura lógica fixa do layout (550 + 150). Forçamos no clone que o
+    // html-to-image cria (via `style`), pra não depender da largura
+    // renderizada na tela — que pode ser menor e fazer o painel lateral ser
+    // cortado pelo overflow-hidden.
+    const LARGURA_BASE = 700;
+    const ALTURA_BASE = Math.round((LARGURA_BASE * ALTURA) / LARGURA);
+
     try {
-      const escalaReal = LARGURA / node.clientWidth;
-      const dataUrl = await toPng(node, {
-        width: LARGURA,
-        height: ALTURA,
+      const opcoes = {
         cacheBust: true,
         backgroundColor: "#fff7e6",
+        pixelRatio: LARGURA / LARGURA_BASE,
+        width: LARGURA_BASE,
+        height: ALTURA_BASE,
         style: {
-          transform: `scale(${escalaReal})`,
-          transformOrigin: "top left",
-          width: `${node.clientWidth}px`,
-          height: `${node.clientHeight}px`,
+          width: `${LARGURA_BASE}px`,
+          maxWidth: "none",
+          height: `${ALTURA_BASE}px`,
+          margin: "0",
         },
-      });
+      };
+      // Primeira chamada "esquenta" o cache de imagens/fontes no clone;
+      // a segunda gera o PNG final correto — workaround conhecido do
+      // html-to-image em navegadores Chromium.
+      await toPng(node, opcoes);
+      const dataUrl = await toPng(node, opcoes);
       const a = document.createElement("a");
       a.href = dataUrl;
       a.download = "cardapio-dogao-do-lalo.png";
       document.body.appendChild(a);
       a.click();
       a.remove();
-    } catch {
+    } catch (e) {
+      console.error("Falha ao gerar PNG do cardápio:", e);
       setErro("Não foi possível gerar o PNG. Tenta de novo.");
     } finally {
       setGerandoPng(false);
@@ -278,23 +321,14 @@ export default function CardapioImpresso({
       <div
         id="area-impressao"
         ref={areaRef}
-        className="mx-auto mt-2 flex w-full max-w-[700px] overflow-hidden bg-creme text-marinho shadow-2xl print:max-w-none print:w-[297mm] print:shadow-none"
+        className="mx-auto mt-2 flex w-full max-w-[700px] overflow-hidden bg-creme text-marinho shadow-2xl print:shadow-none"
         style={{ aspectRatio: `${LARGURA} / ${ALTURA}` }}
       >
         {/* Coluna principal — largura fixa (não flex-1) pra somar exatamente
             700px com a lateral, sem depender de recálculo do flexbox na
             clonagem do html-to-image */}
         <div className="flex w-[550px] shrink-0 flex-col">
-          <div className="bg-marinho px-[14px] py-[8px]">
-            <p className="font-display text-[14px] font-extrabold leading-none text-creme">
-              Dogão do Lalo{" "}
-              <span className="text-[8px] font-normal uppercase tracking-wide text-amarelo">
-                · Cardápio completo
-              </span>
-            </p>
-          </div>
-
-          <div className="flex flex-1 gap-[12px] overflow-hidden px-[14px] py-[10px]">
+          <div className="flex flex-1 gap-[18px] overflow-hidden px-[16px] py-[12px]">
             {colunas.map((coluna, idxColuna) => (
               <div key={idxColuna} className="min-w-0 flex-1">
                 {coluna.map((b, i) => (
@@ -304,54 +338,67 @@ export default function CardapioImpresso({
             ))}
           </div>
 
+          <div className="bg-vermelho-texto px-[14px] py-[4px] text-center">
+            <p className="text-[8px] font-extrabold uppercase tracking-wide text-white">
+              Dog Simples, Dog Duplo e X-Burguer não adicionamos
+            </p>
+          </div>
+
           <div className="bg-marinho px-[14px] py-[6px] text-center">
             <p className="text-[7px] font-bold text-amarelo">{ADDRESS}</p>
           </div>
         </div>
 
         {/* Painel lateral promocional */}
-        <div className="flex w-[150px] shrink-0 flex-col items-center justify-between bg-amarelo px-[10px] py-[12px] text-center">
-          <div>
-            <img
-              src="/brand/mascote.png"
-              alt=""
-              className="mx-auto h-[52px] w-[52px] object-contain"
-              crossOrigin="anonymous"
-            />
-            <p className="font-display text-[15px] font-extrabold leading-[0.95] text-marinho">
-              Dogão
-              <br />
-              do Lalo
-            </p>
-          </div>
+        <div className="flex w-[150px] shrink-0 flex-col items-center gap-[9px] overflow-hidden bg-amarelo px-[10px] py-[12px] text-center">
+          {/* Logo */}
+          <img
+            src="/brand/logo-principal.png"
+            alt="Dogão do Lalo"
+            className="max-h-[64px] w-full object-contain"
+            crossOrigin="anonymous"
+          />
 
-          <div className="flex flex-col items-center gap-[3px]">
-            <span className="rounded-full bg-marinho px-[6px] py-[2px] text-[6px] font-extrabold uppercase tracking-wide text-amarelo">
-              🛵 Fast Delivery
-            </span>
-            <div className="flex items-center gap-[3px] text-marinho">
-              <WhatsAppIcon className="h-[10px] w-[10px]" />
-              <p className="font-display text-[13px] font-extrabold tabular-nums leading-none">
-                {PHONE_DISPLAY}
-              </p>
-            </div>
-            <p className="font-display text-[11px] italic font-bold text-vermelho-texto">
-              Aceitamos PIX
-            </p>
-          </div>
+          {/* Badge Delivery */}
+          <span className="inline-flex items-center gap-[3px] rounded-full border-[1.5px] border-marinho px-[8px] py-[2px] text-[7px] font-extrabold uppercase tracking-[0.1em] text-marinho">
+            <TruckIcon className="h-[9px] w-[9px]" />
+            Delivery
+          </span>
 
+          {/* Círculo WhatsApp */}
+          <span className="flex h-[44px] w-[44px] items-center justify-center rounded-full bg-[#25D366] shadow-[0_3px_0_#128C7E]">
+            <WhatsAppIcon className="h-[26px] w-[26px] text-white" />
+          </span>
+
+          {/* Chame no WhatsApp */}
+          <p className="text-[7px] font-bold uppercase tracking-[0.16em] text-marinho">
+            Chame no WhatsApp
+          </p>
+
+          {/* Número — destaque principal */}
+          <p className="whitespace-nowrap font-display text-[13px] font-extrabold leading-none tracking-tight text-marinho tabular-nums">
+            {PHONE_DISPLAY}
+          </p>
+
+          {/* Botão Peça agora */}
+          <span className="inline-flex items-center gap-[4px] rounded-[8px] bg-[#25D366] px-[12px] py-[5px] text-[9px] font-extrabold uppercase tracking-wide text-white shadow-[0_3px_0_#128C7E]">
+            <WhatsAppIcon className="h-[11px] w-[11px] text-white" />
+            Peça agora
+          </span>
+
+          {/* QR PIX */}
           {pixQrSvg ? (
             <div className="flex flex-col items-center gap-[3px]">
+              <p className="text-[6px] font-extrabold uppercase tracking-wide text-marinho/80">
+                Pague com PIX
+              </p>
               <div
-                className="rounded-[6px] border-[2px] border-marinho bg-white p-[4px] [&_svg]:block [&_svg]:h-[76px] [&_svg]:w-[76px]"
+                className="rounded-[5px] border-[2px] border-marinho bg-white p-[3px] [&_svg]:block [&_svg]:h-[60px] [&_svg]:w-[60px]"
                 dangerouslySetInnerHTML={{ __html: pixQrSvg }}
               />
-              <p className="text-[6px] font-bold text-marinho">
-                Escaneie e pague com PIX
-              </p>
             </div>
           ) : (
-            <div className="h-[80px] w-[80px] rounded-[6px] border-[2px] border-dashed border-marinho/40" />
+            <div className="h-[66px] w-[66px] rounded-[5px] border-[2px] border-dashed border-marinho/40" />
           )}
         </div>
       </div>

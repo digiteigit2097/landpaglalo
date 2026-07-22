@@ -37,11 +37,14 @@ export default async function CardapioImpressoPage() {
       nome: "Dogao do Lalo",
       cidade: "Londrina",
     });
-    // preto/branco puro — QR de pagamento precisa do contraste máximo
+    // preto/branco puro — QR de pagamento precisa do contraste máximo.
+    // margin 4 = quiet zone padrão (essencial pra leitura confiável impressa);
+    // errorCorrectionLevel M dá boa tolerância sem deixar o QR denso demais.
     pixQrSvg = await QRCode.toString(payload, {
       type: "svg",
-      margin: 1,
+      margin: 4,
       width: 400,
+      errorCorrectionLevel: "M",
       color: { dark: "#000000", light: "#ffffff" },
     });
   }

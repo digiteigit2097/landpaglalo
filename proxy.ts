@@ -24,9 +24,20 @@ export async function proxy(request: NextRequest) {
     },
   });
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  let user = null;
+  try {
+    const { data } = await supabase.auth.getUser();
+    user = data.user;
+  } catch {
+    // Falha de rede/timeout ao checar a sessão (ex.: Supabase indisponível
+    // por um instante). Trata como não autenticado em vez de deixar a
+    // exceção propagar — isso é especialmente importante porque o proxy
+    // também roda nas requisições POST de Server Actions das páginas do
+    // admin, e um erro aqui faz o Next devolver uma resposta que o
+    // cliente não reconhece como RSC válido, gerando o erro genérico
+    // "An unexpected response was received from the server."
+    user = null;
+  }
 
   const { pathname } = request.nextUrl;
   const isLoginPage = pathname === "/admin/login";

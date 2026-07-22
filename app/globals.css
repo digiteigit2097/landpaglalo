@@ -91,6 +91,10 @@ body {
    marcada; o tamanho da página (@page) é definido por cada página em um
    <style> próprio, porque A4 e cupom têm tamanhos bem diferentes. */
 @media print {
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
   body * {
     visibility: hidden;
   }
@@ -98,9 +102,19 @@ body {
   #area-impressao * {
     visibility: visible;
   }
+  /* NÃO usar inset:0 aqui — isso estica a caixa pro tamanho da página
+     inteira, mas os filhos (colunas/painel) têm largura fixa em px
+     pensada pro preview de 700px, então tudo ficava desalinhado com
+     um vão enorme sobrando. Em vez disso, mantemos o tamanho natural
+     (700px de largura, mesma proporção do A4 paisagem) e escalamos
+     com transform pra preencher a página exatamente — mesma técnica
+     do PNG (pixelRatio), só que via CSS. */
   #area-impressao {
     position: fixed;
-    inset: 0;
+    top: 0;
+    left: 0;
     margin: 0 !important;
+    transform-origin: top left;
+    transform: scale(1.604);
   }
 }
