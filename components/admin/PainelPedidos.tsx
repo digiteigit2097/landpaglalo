@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Printer } from "lucide-react";
 import { supabaseBrowser } from "@/lib/supabase-browser";
 import { formatPreco } from "@/lib/menu";
 import {
@@ -138,9 +139,10 @@ function PedidoCard({
               );
               onAvancar(pedido.id, "impresso");
             }}
-            className="min-h-11 rounded-full bg-admin-dourado px-4 font-bold text-admin-navy transition-transform hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-admin-navy"
+            className="flex min-h-11 items-center gap-2 rounded-full bg-admin-dourado px-4 font-bold text-admin-navy transition-transform hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-admin-navy"
           >
-            🖨️ Imprimir pedido
+            <Printer aria-hidden className="h-4 w-4" strokeWidth={2.5} />
+            Imprimir pedido
           </button>
         ) : (
           <>
@@ -162,9 +164,10 @@ function PedidoCard({
                   "width=420,height=650"
                 )
               }
-              className="min-h-11 rounded-full px-4 font-semibold text-admin-dourado-escuro hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-admin-dourado"
+              className="flex min-h-11 items-center gap-2 rounded-full px-4 font-semibold text-admin-dourado-escuro hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-admin-dourado"
             >
-              🖨️ Reimprimir
+              <Printer aria-hidden className="h-4 w-4" strokeWidth={2.5} />
+              Reimprimir
             </button>
           </>
         )}

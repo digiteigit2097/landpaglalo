@@ -1,5 +1,11 @@
 import Image from "next/image";
 import Cardapio from "@/components/Cardapio";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { BlurredOrb } from "@/components/blurred-orb";
+import { GridPattern } from "@/components/ui/grid-pattern";
+import { Reveal, RevealGroup, RevealItem } from "@/components/reveal";
 import {
   WHATSAPP_LINK,
   PHONE_DISPLAY,
@@ -92,34 +98,32 @@ export default async function Home() {
               Onde estamos
             </a>
           </nav>
-          <a
+          <Button
             href={WHATSAPP_LINK}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex min-h-11 items-center gap-2 rounded-full bg-amarelo px-4 py-2 font-display text-sm font-bold text-marinho transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-creme focus-visible:ring-offset-2 focus-visible:ring-offset-marinho"
+            size="sm"
+            className="min-h-11 font-bold"
           >
             <WhatsAppIcon className="h-4 w-4" />
             Pedir agora
-          </a>
+          </Button>
         </div>
       </header>
 
       <main id="inicio" className="flex-1">
         {/* Hero */}
         <section className="relative overflow-hidden bg-marinho text-creme">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-azul/20 blur-3xl"
+          <GridPattern
+            width={48}
+            height={48}
+            className="[mask-image:radial-gradient(ellipse_60%_60%_at_50%_0%,black,transparent)]"
           />
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -bottom-32 -left-24 h-80 w-80 rounded-full bg-vermelho/20 blur-3xl"
-          />
+          <BlurredOrb className="-right-24 -top-24 h-72 w-72 bg-azul/20" />
+          <BlurredOrb className="-bottom-32 -left-24 h-80 w-80 bg-vermelho/20" />
           <div className="mx-auto grid max-w-5xl items-center gap-8 px-4 py-12 sm:grid-cols-2 sm:py-20">
-            <div className="text-center sm:text-left">
-              <span className="inline-flex items-center gap-2 rounded-full bg-amarelo px-4 py-1.5 font-display text-sm font-bold uppercase tracking-wide text-marinho">
-                🚀 Fast Delivery
-              </span>
+            <Reveal className="text-center sm:text-left">
+              <Badge variant="amarelo">🚀 Fast Delivery</Badge>
               <h1 className="mt-4 font-display text-4xl font-extrabold leading-tight sm:text-5xl">
                 O dogão mais <span className="text-amarelo">estiloso</span> de
                 Londrina
@@ -130,31 +134,25 @@ export default async function Home() {
                 <strong className="text-amarelo">PIX</strong>!
               </p>
               <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:items-start">
-                <a
+                <Button
                   href={WHATSAPP_LINK}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-amarelo px-8 py-4 font-display text-lg font-extrabold text-marinho shadow-lg transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-creme focus-visible:ring-offset-2 focus-visible:ring-offset-marinho sm:w-auto"
+                  className="w-full sm:w-auto"
                 >
                   <WhatsAppIcon className="h-6 w-6" />
                   Pedir no WhatsApp
-                </a>
-                <a
-                  href="#cardapio"
-                  className="inline-flex w-full items-center justify-center rounded-full border-2 border-creme/40 px-8 py-4 font-display text-lg font-bold text-creme transition-colors hover:border-amarelo hover:text-amarelo focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amarelo focus-visible:ring-offset-2 focus-visible:ring-offset-marinho sm:w-auto"
-                >
+                </Button>
+                <Button href="#cardapio" variant="outline" className="w-full sm:w-auto">
                   Ver cardápio
-                </a>
+                </Button>
               </div>
               <p className="mt-4 font-display text-2xl font-extrabold tracking-wide tabular-nums text-amarelo">
                 {PHONE_DISPLAY}
               </p>
-            </div>
-            <div className="relative mx-auto w-56 sm:w-full sm:max-w-sm">
-              <div
-                aria-hidden
-                className="absolute inset-0 scale-90 rounded-full bg-amarelo/15 blur-2xl"
-              />
+            </Reveal>
+            <Reveal delay={0.15} className="relative mx-auto w-56 sm:w-full sm:max-w-sm">
+              <BlurredOrb className="inset-0 scale-90 rounded-full bg-amarelo/15 blur-2xl" />
               <Image
                 src="/brand/mascote.png"
                 alt="Mascote do Dogão do Lalo: hot dog de óculos escuros e boné fazendo joia"
@@ -163,7 +161,7 @@ export default async function Home() {
                 className="relative drop-shadow-2xl"
                 priority
               />
-            </div>
+            </Reveal>
           </div>
           <div aria-hidden className="toldo h-4" />
         </section>
@@ -171,35 +169,34 @@ export default async function Home() {
         {/* Destaques */}
         <section className="bg-amarelo py-14 sm:py-20">
           <div className="mx-auto max-w-5xl px-4">
-            <div className="text-center">
+            <Reveal className="text-center">
               <h2 className="font-display text-3xl font-extrabold text-marinho sm:text-4xl">
                 Os queridinhos da galera
               </h2>
               <p className="mt-2 text-marinho/70">
                 Não sabe por onde começar? Vai de um desses:
               </p>
-            </div>
-            <div className="mt-8 grid gap-4 sm:grid-cols-3">
+            </Reveal>
+            <RevealGroup className="mt-8 grid gap-4 sm:grid-cols-3">
               {destaques.map((item) => (
-                <div
-                  key={item.nome}
-                  className="flex flex-col rounded-3xl bg-white p-6 shadow-lg ring-1 ring-marinho/10"
-                >
-                  <span className="self-start rounded-full bg-vermelho-texto px-3 py-1 font-display text-xs font-bold uppercase tracking-wide text-creme">
-                    {item.tag}
-                  </span>
-                  <h3 className="mt-3 font-display text-xl font-extrabold text-marinho">
-                    {item.nome}
-                  </h3>
-                  <p className="mt-2 flex-1 text-sm text-marinho/70">
-                    {item.descricao}
-                  </p>
-                  <p className="mt-4 font-display text-2xl font-extrabold tabular-nums text-vermelho-texto">
-                    {formatPreco(item.preco)}
-                  </p>
-                </div>
+                <RevealItem key={item.nome}>
+                  <Card>
+                    <Badge variant="tag" className="self-start">
+                      {item.tag}
+                    </Badge>
+                    <h3 className="mt-3 font-display text-xl font-extrabold text-marinho">
+                      {item.nome}
+                    </h3>
+                    <p className="mt-2 flex-1 text-sm text-marinho/70">
+                      {item.descricao}
+                    </p>
+                    <p className="mt-4 font-display text-2xl font-extrabold tabular-nums text-vermelho-texto">
+                      {formatPreco(item.preco)}
+                    </p>
+                  </Card>
+                </RevealItem>
               ))}
-            </div>
+            </RevealGroup>
           </div>
         </section>
 
@@ -209,13 +206,20 @@ export default async function Home() {
         {/* Como pedir */}
         <section
           id="como-pedir"
-          className="scroll-mt-20 bg-marinho py-14 text-creme sm:py-20"
+          className="relative scroll-mt-20 overflow-hidden bg-marinho py-14 text-creme sm:py-20"
         >
-          <div className="mx-auto max-w-5xl px-4 text-center">
-            <h2 className="font-display text-3xl font-extrabold sm:text-4xl">
-              Pedir é <span className="text-amarelo">rapidinho</span>
-            </h2>
-            <div className="mt-10 grid gap-8 sm:grid-cols-3">
+          <GridPattern
+            width={48}
+            height={48}
+            className="[mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,black,transparent)]"
+          />
+          <div className="relative mx-auto max-w-5xl px-4 text-center">
+            <Reveal>
+              <h2 className="font-display text-3xl font-extrabold sm:text-4xl">
+                Pedir é <span className="text-amarelo">rapidinho</span>
+              </h2>
+            </Reveal>
+            <RevealGroup className="mt-10 grid gap-8 sm:grid-cols-3">
               {[
                 {
                   passo: "1",
@@ -233,7 +237,7 @@ export default async function Home() {
                   texto: "Fast delivery pra chegar quentinho na sua casa",
                 },
               ].map((s) => (
-                <div key={s.passo} className="flex flex-col items-center">
+                <RevealItem key={s.passo} className="flex flex-col items-center">
                   <span className="flex h-14 w-14 items-center justify-center rounded-full bg-amarelo font-display text-2xl font-extrabold text-marinho">
                     {s.passo}
                   </span>
@@ -241,18 +245,20 @@ export default async function Home() {
                     {s.titulo}
                   </h3>
                   <p className="mt-2 text-creme/75">{s.texto}</p>
-                </div>
+                </RevealItem>
               ))}
-            </div>
-            <a
-              href={WHATSAPP_LINK}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-10 inline-flex items-center gap-2 rounded-full bg-amarelo px-8 py-4 font-display text-lg font-extrabold text-marinho shadow-lg transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-creme focus-visible:ring-offset-2 focus-visible:ring-offset-marinho"
-            >
-              <WhatsAppIcon className="h-6 w-6" />
-              Fazer meu pedido
-            </a>
+            </RevealGroup>
+            <Reveal delay={0.2}>
+              <Button
+                href={WHATSAPP_LINK}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-10"
+              >
+                <WhatsAppIcon className="h-6 w-6" />
+                Fazer meu pedido
+              </Button>
+            </Reveal>
           </div>
         </section>
 
@@ -262,7 +268,7 @@ export default async function Home() {
           className="scroll-mt-20 bg-creme py-14 sm:py-20"
         >
           <div className="mx-auto grid max-w-5xl items-center gap-8 px-4 sm:grid-cols-2">
-            <div className="text-center sm:text-left">
+            <Reveal className="text-center sm:text-left">
               <h2 className="font-display text-3xl font-extrabold sm:text-4xl">
                 Onde estamos
               </h2>
@@ -270,17 +276,22 @@ export default async function Home() {
                 <PinIcon className="mt-0.5 h-5 w-5 shrink-0 text-vermelho" />
                 <span>{ADDRESS}</span>
               </p>
-              <a
+              <Button
                 href={MAPS_LINK}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-6 inline-flex items-center gap-2 rounded-full bg-marinho px-6 py-3 font-display font-bold text-creme transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marinho focus-visible:ring-offset-2 focus-visible:ring-offset-creme"
+                variant="dark"
+                size="md"
+                className="mt-6"
               >
                 <PinIcon className="h-5 w-5 text-amarelo" />
                 Abrir no Google Maps
-              </a>
-            </div>
-            <div className="overflow-hidden rounded-3xl shadow-lg ring-1 ring-marinho/10">
+              </Button>
+            </Reveal>
+            <Reveal
+              delay={0.15}
+              className="overflow-hidden rounded-3xl shadow-lg ring-1 ring-marinho/10"
+            >
               <iframe
                 src={MAPS_EMBED}
                 title="Mapa: Dogão do Lalo em Londrina"
@@ -289,7 +300,7 @@ export default async function Home() {
                 referrerPolicy="no-referrer-when-downgrade"
                 allowFullScreen
               />
-            </div>
+            </Reveal>
           </div>
         </section>
       </main>
@@ -333,16 +344,17 @@ export default async function Home() {
       </footer>
 
       {/* Botão WhatsApp fixo (mobile) */}
-      <a
+      <Button
         href={WHATSAPP_LINK}
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Pedir pelo WhatsApp"
-        className="fixed bottom-4 left-4 right-4 z-50 flex items-center justify-center gap-2 rounded-full bg-[#25D366] px-6 py-4 font-display text-lg font-extrabold text-white shadow-2xl transition-transform hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/80 sm:hidden"
+        variant="whatsapp"
+        className="fixed bottom-4 left-4 right-4 z-50 focus-visible:ring-4 sm:hidden"
       >
         <WhatsAppIcon className="h-6 w-6" />
         Pedir pelo WhatsApp
-      </a>
+      </Button>
     </>
   );
 }

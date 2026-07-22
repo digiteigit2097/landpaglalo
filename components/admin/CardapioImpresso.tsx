@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { toPng } from "html-to-image";
+import { FileText, Image as ImageIcon } from "lucide-react";
 import { formatPreco, PHONE_DISPLAY, ADDRESS } from "@/lib/menu";
 import type { Categoria, OpcionalFlat, Produto } from "@/lib/cardapio";
 
@@ -286,17 +287,19 @@ export default function CardapioImpresso({
           <button
             type="button"
             onClick={() => window.print()}
-            className="min-h-11 rounded-full bg-admin-navy px-5 font-bold text-admin-branco-creme transition-transform hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-admin-dourado"
+            className="flex min-h-11 items-center gap-2 rounded-full bg-admin-navy px-5 font-bold text-admin-branco-creme transition-transform hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-admin-dourado"
           >
-            📄 Baixar PDF
+            <FileText aria-hidden className="h-4 w-4" strokeWidth={2.5} />
+            Baixar PDF
           </button>
           <button
             type="button"
             onClick={baixarPng}
             disabled={gerandoPng}
-            className="min-h-11 rounded-full bg-admin-dourado px-5 font-bold text-admin-navy transition-transform enabled:hover:scale-[1.02] disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-admin-navy"
+            className="flex min-h-11 items-center gap-2 rounded-full bg-admin-dourado px-5 font-bold text-admin-navy transition-transform enabled:hover:scale-[1.02] disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-admin-navy"
           >
-            {gerandoPng ? "Gerando..." : "🖼️ Baixar PNG"}
+            <ImageIcon aria-hidden className="h-4 w-4" strokeWidth={2.5} />
+            {gerandoPng ? "Gerando..." : "Baixar PNG"}
           </button>
         </div>
       </div>

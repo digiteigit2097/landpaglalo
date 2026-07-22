@@ -2,15 +2,25 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import {
+  LayoutDashboard,
+  Receipt,
+  UtensilsCrossed,
+  QrCode,
+  Printer,
+  Users,
+  LogOut,
+  type LucideIcon,
+} from "lucide-react";
 import { logoutAdmin } from "@/app/admin/actions";
 
-const links = [
-  { href: "/admin", label: "Dashboard", icone: "📊" },
-  { href: "/admin/pedidos", label: "Pedidos", icone: "🧾" },
-  { href: "/admin/catalogo", label: "Catálogo", icone: "🍔" },
-  { href: "/admin/qrcode", label: "QR Code", icone: "📱" },
-  { href: "/admin/cardapio-impresso", label: "Cardápio p/ imprimir", icone: "🖨️" },
-  { href: "/admin/usuarios", label: "Usuários", icone: "👤" },
+const links: { href: string; label: string; Icone: LucideIcon }[] = [
+  { href: "/admin", label: "Dashboard", Icone: LayoutDashboard },
+  { href: "/admin/pedidos", label: "Pedidos", Icone: Receipt },
+  { href: "/admin/catalogo", label: "Catálogo", Icone: UtensilsCrossed },
+  { href: "/admin/qrcode", label: "QR Code", Icone: QrCode },
+  { href: "/admin/cardapio-impresso", label: "Cardápio p/ imprimir", Icone: Printer },
+  { href: "/admin/usuarios", label: "Usuários", Icone: Users },
 ];
 
 function ativo(pathname: string, href: string) {
@@ -43,7 +53,7 @@ export default function Sidebar({ nome }: { nome: string }) {
                 : "text-admin-branco-creme/85 hover:bg-admin-navy-suave"
             }`}
           >
-            <span aria-hidden>{l.icone}</span>
+            <l.Icone aria-hidden className="h-5 w-5 shrink-0" strokeWidth={2} />
             {l.label}
           </Link>
         ))}
@@ -56,8 +66,9 @@ export default function Sidebar({ nome }: { nome: string }) {
         <form action={logoutAdmin}>
           <button
             type="submit"
-            className="mt-2 flex min-h-11 w-full items-center justify-center rounded-xl px-4 font-semibold text-admin-branco-creme/85 transition-colors hover:bg-admin-navy-suave focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-admin-dourado"
+            className="mt-2 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl px-4 font-semibold text-admin-branco-creme/85 transition-colors hover:bg-admin-navy-suave focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-admin-dourado"
           >
+            <LogOut aria-hidden className="h-4 w-4" strokeWidth={2} />
             Sair
           </button>
         </form>
