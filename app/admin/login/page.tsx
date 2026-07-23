@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import Image from "next/image";
 import { supabaseBrowser } from "@/lib/supabase-browser";
 
@@ -89,6 +90,12 @@ export default function AdminLoginPage() {
               {erro}
             </p>
           )}
+          <Link
+            href="/admin/esqueci-senha"
+            className="block text-right text-sm font-semibold text-admin-navy/70 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-admin-dourado"
+          >
+            Esqueci minha senha
+          </Link>
         </div>
 
         <button

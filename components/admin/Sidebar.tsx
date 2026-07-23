@@ -8,6 +8,7 @@ import {
   UtensilsCrossed,
   QrCode,
   Printer,
+  MessageCircle,
   Users,
   LogOut,
   type LucideIcon,
@@ -20,6 +21,7 @@ const links: { href: string; label: string; Icone: LucideIcon }[] = [
   { href: "/admin/catalogo", label: "Catálogo", Icone: UtensilsCrossed },
   { href: "/admin/qrcode", label: "QR Code", Icone: QrCode },
   { href: "/admin/cardapio-impresso", label: "Cardápio p/ imprimir", Icone: Printer },
+  { href: "/admin/cardapio-whatsapp", label: "Cardápio p/ WhatsApp", Icone: MessageCircle },
   { href: "/admin/usuarios", label: "Usuários", Icone: Users },
 ];
 

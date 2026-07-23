@@ -41,8 +41,14 @@ export async function proxy(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
   const isLoginPage = pathname === "/admin/login";
+  // esqueci-senha: sempre pública. redefinir-senha: pública mesmo sem
+  // cookie de sessão — o token de recuperação vem na URL (#hash), que o
+  // middleware nunca vê (hash não é enviado ao servidor); a página troca
+  // esse token por sessão no client, depois do redirect já ter passado.
+  const isRecuperacaoSenha =
+    pathname === "/admin/esqueci-senha" || pathname === "/admin/redefinir-senha";
 
-  if (!user && !isLoginPage) {
+  if (!user && !isLoginPage && !isRecuperacaoSenha) {
     const loginUrl = new URL("/admin/login", request.url);
     return NextResponse.redirect(loginUrl);
   }
