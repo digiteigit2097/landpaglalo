@@ -2,7 +2,8 @@
 
 import { useRef, useState } from "react";
 import { toPng } from "html-to-image";
-import { FileText, Image as ImageIcon } from "lucide-react";
+import { jsPDF } from "jspdf";
+import { FileText, Image as ImageIcon, Loader2 } from "lucide-react";
 import { formatPreco, PHONE_DISPLAY, ADDRESS } from "@/lib/menu";
 import type { Categoria, OpcionalFlat, Produto } from "@/lib/cardapio";
 
@@ -45,6 +46,65 @@ function variacaoAlternativa(produto: Produto) {
   );
 }
 
+// linha "grifada" com fundo amarelo-claro, usada nos itens que têm
+// descrição (Cheese e Hot Dog) — deixa nome+preço mais fáceis de achar
+// numa lista comprida.
+function LinhaDestacada({
+  nome,
+  precoLabel,
+  descricao,
+}: {
+  nome: string;
+  precoLabel: React.ReactNode;
+  descricao: string | null;
+}) {
+  return (
+    <div className="mb-[2px] border-b-[0.75px] border-dashed border-[#9aa3b2] pb-[1.5px] last:border-b-0 last:pb-0">
+      <div className="flex items-baseline justify-between gap-1 rounded-[2px] bg-[#fff3b0] p-[2px]">
+        <p className="text-[8.5px] font-bold leading-[1.05] text-marinho">
+          {nome}
+        </p>
+        <p className="shrink-0 text-[8.5px] font-bold leading-[1.05] tabular-nums text-vermelho-texto">
+          {precoLabel}
+        </p>
+      </div>
+      {descricao && (
+        <p className="text-[6.5px] font-semibold leading-[1.15] text-black">
+          {descricao}
+        </p>
+      )}
+    </div>
+  );
+}
+
+// linha compacta com divisória tracejada, usada em itens sem descrição
+// (Bebidas) e nos Opcionais — mesma tipografia dos dois pra ficar
+// visualmente igual.
+function LinhaCompacta({
+  nome,
+  precoLabel,
+}: {
+  nome: string;
+  precoLabel: React.ReactNode;
+}) {
+  return (
+    <div className="mb-[1.5px] flex items-baseline justify-between gap-1 border-b-[0.75px] border-dashed border-[#9aa3b2] pb-[1px] last:border-b-0 last:pb-0">
+      <p className="text-[9.6px] font-semibold text-marinho">{nome}</p>
+      <p className="shrink-0 text-[9.6px] font-bold tabular-nums text-vermelho-texto">
+        {precoLabel}
+      </p>
+    </div>
+  );
+}
+
+function LinhaNormalArtesanal() {
+  return (
+    <p className="mb-[1px] text-right text-[5.3px] font-extrabold uppercase leading-[1.1] tracking-wide text-marinho">
+      Normal <span className="text-marinho/40">/</span> Artesanal
+    </p>
+  );
+}
+
 function ItemCheese({ produto }: { produto: Produto }) {
   const normal =
     produto.variacoes.find((v) => v.nome === "Normal") ?? {
@@ -57,61 +117,54 @@ function ItemCheese({ produto }: { produto: Produto }) {
       preco: produto.preco,
     };
   return (
-    <div className="mb-[3.5px]">
-      <div className="flex items-baseline justify-between gap-1">
-        <p className="text-[9px] font-bold leading-tight text-marinho">
-          {produto.nome}
-        </p>
-        <p className="shrink-0 text-[9px] font-bold tabular-nums text-vermelho-texto">
+    <LinhaDestacada
+      nome={produto.nome}
+      descricao={produto.descricao}
+      precoLabel={
+        <>
           {formatPreco(normal.preco)}
           <span className="text-marinho/50"> / </span>
           {formatPreco(artesanal.preco)}
-        </p>
-      </div>
-      {produto.descricao && (
-        <p className="text-[5px] leading-snug text-marinho/60">
-          {produto.descricao}
-        </p>
-      )}
-    </div>
+        </>
+      }
+    />
   );
 }
 
 function ItemSimples({ produto }: { produto: Produto }) {
   const alt = variacaoAlternativa(produto);
-  return (
-    <div className="mb-[3.5px]">
+  const precoLabel = (
+    <>
+      {formatPreco(produto.preco)}
       {alt && (
-        <p className="text-right text-[6px] font-extrabold uppercase tracking-wide text-marinho">
-          Normal <span className="text-marinho/40">/</span> Artesanal
-        </p>
+        <>
+          <span className="text-marinho/50"> / </span>
+          {formatPreco(alt.preco)}
+        </>
       )}
-      <div className="flex items-baseline justify-between gap-1">
-        <p className="text-[9px] font-bold leading-tight text-marinho">
-          {produto.nome}
-        </p>
-        <p className="shrink-0 text-[9px] font-bold tabular-nums text-vermelho-texto">
-          {formatPreco(produto.preco)}
-          {alt && (
-            <>
-              <span className="text-marinho/50"> / </span>
-              {formatPreco(alt.preco)}
-            </>
-          )}
-        </p>
-      </div>
-      {produto.descricao && (
-        <p className="text-[5px] leading-snug text-marinho/60">
-          {produto.descricao}
-        </p>
-      )}
-    </div>
+    </>
   );
+
+  // com descrição (Hot Dog): linha grifada igual ao Cheese.
+  // sem descrição (Bebidas): linha compacta igual aos Opcionais.
+  if (produto.descricao) {
+    return (
+      <>
+        {alt && <LinhaNormalArtesanal />}
+        <LinhaDestacada
+          nome={produto.nome}
+          descricao={produto.descricao}
+          precoLabel={precoLabel}
+        />
+      </>
+    );
+  }
+  return <LinhaCompacta nome={produto.nome} precoLabel={precoLabel} />;
 }
 
 function TituloSecao({ children }: { children: React.ReactNode }) {
   return (
-    <h3 className="mb-[7px] inline-block rounded-[3px] bg-marinho px-[7px] py-[1.5px] text-[9px] font-extrabold uppercase tracking-wide text-amarelo">
+    <h3 className="mb-[4px] inline-block rounded-[3px] bg-marinho px-[7px] py-[1.5px] text-[8.5px] font-extrabold uppercase tracking-wide text-amarelo">
       {children}
     </h3>
   );
@@ -165,11 +218,7 @@ function RenderBloco({ bloco }: { bloco: Bloco }) {
     return (
       <section className="mb-[8px]">
         <TituloSecao>{bloco.categoria.nome}</TituloSecao>
-        {ehCheese && (
-          <p className="mb-[3px] text-right text-[6px] font-extrabold uppercase tracking-wide text-marinho">
-            Normal <span className="text-marinho/40">/</span> Artesanal
-          </p>
-        )}
+        {ehCheese && <LinhaNormalArtesanal />}
         <div>
           {bloco.categoria.produtos.map((p) =>
             ehCheese ? (
@@ -187,15 +236,11 @@ function RenderBloco({ bloco }: { bloco: Bloco }) {
       <TituloSecao>Opcionais</TituloSecao>
       <div>
         {bloco.itens.map((o) => (
-          <div
+          <LinhaCompacta
             key={o.id}
-            className="mb-[3px] flex items-baseline justify-between gap-1"
-          >
-            <p className="text-[8px] font-semibold text-marinho">{o.nome}</p>
-            <p className="shrink-0 text-[8px] font-bold tabular-nums text-vermelho-texto">
-              {formatPreco(o.preco)}
-            </p>
-          </div>
+            nome={o.nome}
+            precoLabel={formatPreco(o.preco)}
+          />
         ))}
       </div>
     </section>
@@ -213,40 +258,46 @@ export default function CardapioImpresso({
 }) {
   const areaRef = useRef<HTMLDivElement>(null);
   const [gerandoPng, setGerandoPng] = useState(false);
+  const [gerandoPdf, setGerandoPdf] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
 
-  async function baixarPng() {
+  // largura lógica fixa do layout (550 + 150). Forçamos no clone que o
+  // html-to-image cria (via `style`), pra não depender da largura
+  // renderizada na tela — que pode ser menor e fazer o painel lateral ser
+  // cortado pelo overflow-hidden.
+  const LARGURA_BASE = 700;
+  const ALTURA_BASE = Math.round((LARGURA_BASE * ALTURA) / LARGURA);
+
+  async function capturarImagemAltaResolucao() {
     const node = areaRef.current;
-    if (!node) return;
+    if (!node) throw new Error("área de impressão não encontrada");
+
+    const opcoes = {
+      cacheBust: true,
+      backgroundColor: "#fff7e6",
+      pixelRatio: LARGURA / LARGURA_BASE,
+      width: LARGURA_BASE,
+      height: ALTURA_BASE,
+      style: {
+        width: `${LARGURA_BASE}px`,
+        maxWidth: "none",
+        height: `${ALTURA_BASE}px`,
+        margin: "0",
+      },
+    };
+    // Primeira chamada "esquenta" o cache de imagens/fontes no clone;
+    // a segunda gera a imagem final correta — workaround conhecido do
+    // html-to-image em navegadores Chromium. LARGURA×ALTURA = 3508×2480,
+    // ou seja A4 paisagem a ~300dpi — nítido o bastante pra impressão.
+    await toPng(node, opcoes);
+    return toPng(node, opcoes);
+  }
+
+  async function baixarPng() {
     setGerandoPng(true);
     setErro(null);
-
-    // largura lógica fixa do layout (550 + 150). Forçamos no clone que o
-    // html-to-image cria (via `style`), pra não depender da largura
-    // renderizada na tela — que pode ser menor e fazer o painel lateral ser
-    // cortado pelo overflow-hidden.
-    const LARGURA_BASE = 700;
-    const ALTURA_BASE = Math.round((LARGURA_BASE * ALTURA) / LARGURA);
-
     try {
-      const opcoes = {
-        cacheBust: true,
-        backgroundColor: "#fff7e6",
-        pixelRatio: LARGURA / LARGURA_BASE,
-        width: LARGURA_BASE,
-        height: ALTURA_BASE,
-        style: {
-          width: `${LARGURA_BASE}px`,
-          maxWidth: "none",
-          height: `${ALTURA_BASE}px`,
-          margin: "0",
-        },
-      };
-      // Primeira chamada "esquenta" o cache de imagens/fontes no clone;
-      // a segunda gera o PNG final correto — workaround conhecido do
-      // html-to-image em navegadores Chromium.
-      await toPng(node, opcoes);
-      const dataUrl = await toPng(node, opcoes);
+      const dataUrl = await capturarImagemAltaResolucao();
       const a = document.createElement("a");
       a.href = dataUrl;
       a.download = "cardapio-dogao-do-lalo.png";
@@ -258,6 +309,31 @@ export default function CardapioImpresso({
       setErro("Não foi possível gerar o PNG. Tenta de novo.");
     } finally {
       setGerandoPng(false);
+    }
+  }
+
+  async function baixarPdf() {
+    setGerandoPdf(true);
+    setErro(null);
+    try {
+      // gera o PDF a partir da MESMA captura em alta resolução do PNG, em
+      // vez do diálogo de impressão do navegador — a qualidade do
+      // window.print() varia conforme DPI/configuração de cada navegador
+      // (foi o que dava aquele PDF borrado); assim fica sempre nítido.
+      const dataUrl = await capturarImagemAltaResolucao();
+      const pdf = new jsPDF({
+        orientation: "landscape",
+        unit: "mm",
+        format: "a4",
+        compress: true,
+      });
+      pdf.addImage(dataUrl, "PNG", 0, 0, 297, 210, undefined, "FAST");
+      pdf.save("cardapio-dogao-do-lalo.pdf");
+    } catch (e) {
+      console.error("Falha ao gerar PDF do cardápio:", e);
+      setErro("Não foi possível gerar o PDF. Tenta de novo.");
+    } finally {
+      setGerandoPdf(false);
     }
   }
 
@@ -286,11 +362,16 @@ export default function CardapioImpresso({
         <div className="flex gap-2">
           <button
             type="button"
-            onClick={() => window.print()}
-            className="flex min-h-11 items-center gap-2 rounded-full bg-admin-navy px-5 font-bold text-admin-branco-creme transition-transform hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-admin-dourado"
+            onClick={baixarPdf}
+            disabled={gerandoPdf}
+            className="flex min-h-11 items-center gap-2 rounded-full bg-admin-navy px-5 font-bold text-admin-branco-creme transition-transform enabled:hover:scale-[1.02] disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-admin-dourado"
           >
-            <FileText aria-hidden className="h-4 w-4" strokeWidth={2.5} />
-            Baixar PDF
+            {gerandoPdf ? (
+              <Loader2 aria-hidden className="h-4 w-4 animate-spin" />
+            ) : (
+              <FileText aria-hidden className="h-4 w-4" strokeWidth={2.5} />
+            )}
+            {gerandoPdf ? "Gerando..." : "Baixar PDF"}
           </button>
           <button
             type="button"
@@ -324,14 +405,14 @@ export default function CardapioImpresso({
       <div
         id="area-impressao"
         ref={areaRef}
-        className="mx-auto mt-2 flex w-full max-w-[700px] overflow-hidden bg-creme text-marinho shadow-2xl print:shadow-none"
+        className="mx-auto mt-2 flex w-full max-w-[700px] overflow-hidden bg-white text-marinho shadow-2xl print:shadow-none"
         style={{ aspectRatio: `${LARGURA} / ${ALTURA}` }}
       >
         {/* Coluna principal — largura fixa (não flex-1) pra somar exatamente
             700px com a lateral, sem depender de recálculo do flexbox na
             clonagem do html-to-image */}
         <div className="flex w-[550px] shrink-0 flex-col">
-          <div className="flex flex-1 gap-[18px] overflow-hidden px-[16px] py-[12px]">
+          <div className="flex flex-1 gap-[12px] overflow-hidden px-[14px] pb-[7px] pt-[9px]">
             {colunas.map((coluna, idxColuna) => (
               <div key={idxColuna} className="min-w-0 flex-1">
                 {coluna.map((b, i) => (
@@ -345,10 +426,6 @@ export default function CardapioImpresso({
             <p className="text-[8px] font-extrabold uppercase tracking-wide text-white">
               Dog Simples, Dog Duplo e X-Burguer não adicionamos
             </p>
-          </div>
-
-          <div className="bg-marinho px-[14px] py-[6px] text-center">
-            <p className="text-[7px] font-bold text-amarelo">{ADDRESS}</p>
           </div>
         </div>
 
@@ -403,6 +480,11 @@ export default function CardapioImpresso({
           ) : (
             <div className="h-[66px] w-[66px] rounded-[5px] border-[2px] border-dashed border-marinho/40" />
           )}
+
+          {/* Endereço — fica grudado no rodapé do painel amarelo */}
+          <p className="mt-auto rounded-[8px] border border-white/[0.16] bg-marinho px-[7px] py-[6px] text-[5px] font-bold leading-[1.4] text-amarelo shadow-[0_3px_0_#0e1f38]">
+            {ADDRESS.replace(/ - /g, " · ")}
+          </p>
         </div>
       </div>
     </div>
