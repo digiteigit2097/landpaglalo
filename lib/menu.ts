@@ -7,6 +7,10 @@ export const FACEBOOK_LINK =
   "https://www.facebook.com/p/Dog%C3%A3o-Do-Lalo-100079507205536/";
 export const ADDRESS =
   "Av. Henrique Mansano, 1490 - Loja 02 - Santa Mônica, Londrina - PR, 86079-450";
+export const ADDRESS_LINE1 = "Av. Henrique Mansano, 1490 - Loja 02";
+export const ADDRESS_LINE2 = "Santa Mônica - Londrina/PR - CEP 86079-450";
+export const CNPJ = "24.725.254/0001-35";
+export const SITE_DOMINIO = "dogaodolalo.com.br";
 export const MAPS_LINK = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
   "Dogão do Lalo - " + ADDRESS
 )}`;

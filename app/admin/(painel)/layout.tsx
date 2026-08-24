@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { supabaseServer } from "@/lib/supabase-server";
 import Sidebar from "@/components/admin/Sidebar";
+import AlertaNovoPedido from "@/components/admin/AlertaNovoPedido";
 
 export default async function PainelLayout({
   children,
@@ -33,6 +34,7 @@ export default async function PainelLayout({
       <main className="min-w-0 flex-1 overflow-y-auto p-6 sm:p-8">
         {children}
       </main>
+      <AlertaNovoPedido />
     </div>
   );
 }

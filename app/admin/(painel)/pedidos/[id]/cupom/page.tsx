@@ -1,6 +1,14 @@
 import { notFound } from "next/navigation";
+import QRCode from "qrcode";
 import { supabaseServer } from "@/lib/supabase-server";
-import { formatPreco } from "@/lib/menu";
+import {
+  formatPreco,
+  ADDRESS_LINE1,
+  ADDRESS_LINE2,
+  PHONE_DISPLAY,
+  CNPJ,
+  SITE_DOMINIO,
+} from "@/lib/menu";
 import AutoPrint from "@/components/admin/AutoPrint";
 
 export const dynamic = "force-dynamic";
@@ -51,7 +59,20 @@ export default async function CupomPedidoPage({
 
   if (!pedido) notFound();
 
-  const horario = new Date(pedido.criado_em).toLocaleString("pt-BR", {
+  const { data: config } = await supabase
+    .from("configuracoes")
+    .select("valor")
+    .eq("chave", "dominio_cardapio")
+    .maybeSingle();
+  const site = (config?.valor as string | undefined)?.replace(/^https?:\/\//i, "") || SITE_DOMINIO;
+
+  const qrSvg = await QRCode.toString(`https://${site}`, {
+    type: "svg",
+    margin: 0,
+    color: { dark: "#000000", light: "#ffffff" },
+  });
+
+  const dataPedido = new Date(pedido.criado_em).toLocaleString("pt-BR", {
     timeZone: "America/Sao_Paulo",
     dateStyle: "short",
     timeStyle: "short",
@@ -64,48 +85,81 @@ export default async function CupomPedidoPage({
 
       <div
         id="area-impressao"
-        className="mx-auto w-full max-w-[320px] break-words font-mono text-[13px] leading-snug text-black print:max-w-none"
+        className="mx-auto w-full max-w-[320px] break-words font-mono text-[12px] leading-snug text-black print:max-w-none"
       >
         <div className="text-center">
           <p className="text-base font-bold">DOGÃO DO LALO</p>
-          <p>Pedido nº {pedido.id}</p>
-          <p>{horario}</p>
+          <p className="font-bold">DELIVERY</p>
+          <p>{ADDRESS_LINE1}</p>
+          <p>{ADDRESS_LINE2}</p>
+          <p>WhatsApp: {PHONE_DISPLAY}</p>
+          <p>{site}</p>
+          <p>CNPJ: {CNPJ}</p>
         </div>
 
         <div className="my-2 border-t border-dashed border-black" />
 
-        <p>Cliente: {pedido.cliente_nome}</p>
+        <p className="font-bold">
+          CLIENTE: <span className="font-normal">{pedido.cliente_nome}</span>
+        </p>
         <p>Tel: {pedido.cliente_telefone}</p>
-
-        <div className="my-2 border-t border-dashed border-black" />
-
-        {pedido.pedido_itens.map((item) => (
-          <div key={item.id} className="mb-2">
-            <p className="font-bold">
-              {item.quantidade}x {item.produto_nome}
-              {item.variacao ? ` (${item.variacao})` : ""}
-            </p>
-            {item.pedido_item_adicionais.map((a) => (
-              <p key={a.id} className="pl-3">
-                + {a.quantidade > 1 ? `${a.quantidade}x ` : ""}
-                {a.adicional_nome}
-              </p>
-            ))}
-            {item.observacao && (
-              <p className="pl-3 italic">obs: {item.observacao}</p>
-            )}
-          </div>
-        ))}
-
-        <div className="my-2 border-t border-dashed border-black" />
-
-        <p className="flex justify-between text-base font-bold">
-          <span>TOTAL</span>
-          <span className="tabular-nums">{formatPreco(pedido.total)}</span>
+        <p className="font-bold">
+          DATA: <span className="font-normal">{dataPedido}</span>
         </p>
 
         <div className="my-2 border-t border-dashed border-black" />
-        <p className="text-center text-xs">Dogão do Lalo — Londrina/PR</p>
+
+        <div className="grid grid-cols-[26px_1fr_50px_56px] gap-x-1 text-[11px] font-bold uppercase">
+          <span>Qtd</span>
+          <span>Item</span>
+          <span className="text-right">Unit.</span>
+          <span className="text-right">Total</span>
+        </div>
+
+        {pedido.pedido_itens.map((item) => {
+          const totalAdicionais = item.pedido_item_adicionais.reduce(
+            (soma, a) => soma + a.preco_unitario * a.quantidade,
+            0
+          );
+          const totalItem = item.preco_unitario * item.quantidade + totalAdicionais;
+          return (
+            <div key={item.id} className="mt-1.5">
+              <div className="grid grid-cols-[26px_1fr_50px_56px] gap-x-1 tabular-nums">
+                <span>{item.quantidade}x</span>
+                <span className="break-words">
+                  {item.produto_nome}
+                  {item.variacao ? ` (${item.variacao})` : ""}
+                </span>
+                <span className="text-right">{formatPreco(item.preco_unitario)}</span>
+                <span className="text-right">{formatPreco(totalItem)}</span>
+              </div>
+              {item.pedido_item_adicionais.map((a) => (
+                <p key={a.id} className="pl-3">
+                  + {a.quantidade > 1 ? `${a.quantidade}x ` : ""}
+                  {a.adicional_nome}
+                </p>
+              ))}
+              {item.observacao && (
+                <p className="pl-3 italic">obs: {item.observacao}</p>
+              )}
+            </div>
+          );
+        })}
+
+        <div className="my-2 border-t border-dashed border-black" />
+
+        <p className="text-base font-bold">TOTAL: {formatPreco(pedido.total)}</p>
+
+        <div className="my-3 flex justify-center [&_svg]:h-[110px] [&_svg]:w-[110px]">
+          <div dangerouslySetInnerHTML={{ __html: qrSvg }} />
+        </div>
+        <p className="text-center">Aponte a câmera para acessar nosso site</p>
+        <p className="text-center">{site}</p>
+
+        <div className="my-2 border-t border-dashed border-black" />
+
+        <p className="text-center font-bold">Obrigado pela preferência!</p>
+        <p className="text-center font-bold">DOCUMENTO NÃO FISCAL</p>
       </div>
     </div>
   );

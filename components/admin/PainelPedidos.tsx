@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Printer } from "lucide-react";
-import { supabaseBrowser } from "@/lib/supabase-browser";
+import { supabaseBrowser, supabaseBrowserComAuthRealtime } from "@/lib/supabase-browser";
 import { formatPreco } from "@/lib/menu";
 import {
   PROXIMO_STATUS,
@@ -228,20 +228,30 @@ export default function PainelPedidos({
 
   useEffect(() => {
     carregarContas();
-    const supabase = supabaseBrowser();
-    const canal = supabase
-      .channel("admin-pedidos")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "pedidos" },
-        () => {
-          router.refresh();
-          carregarContas();
-        }
-      )
-      .subscribe();
+    let cancelado = false;
+    let supabase: Awaited<ReturnType<typeof supabaseBrowserComAuthRealtime>> | null = null;
+
+    supabaseBrowserComAuthRealtime().then((cliente) => {
+      if (cancelado) return;
+      supabase = cliente;
+      cliente
+        .channel("admin-pedidos")
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "pedidos" },
+          () => {
+            router.refresh();
+            carregarContas();
+          }
+        )
+        .subscribe();
+    });
+
     return () => {
-      supabase.removeChannel(canal);
+      cancelado = true;
+      if (supabase) {
+        supabase.removeAllChannels();
+      }
     };
   }, [carregarContas, router]);
 
