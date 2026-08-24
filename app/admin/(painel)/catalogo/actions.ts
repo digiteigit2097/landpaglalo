@@ -122,6 +122,21 @@ export async function alternarAtivoProduto(id: string, ativo: boolean) {
   revalidatePath("/cardapio");
 }
 
+export async function alternarMostrarAdicionaisProduto(
+  id: string,
+  mostrarAdicionais: boolean
+) {
+  const supabase = await supabaseServer();
+  await supabase
+    .from("produtos")
+    .update({ mostrar_adicionais: mostrarAdicionais })
+    .eq("id", id);
+  revalidatePath("/admin/catalogo");
+  revalidatePath(`/admin/catalogo/produtos/${id}`);
+  revalidatePath("/");
+  revalidatePath("/cardapio");
+}
+
 // ---------- Variações ----------
 
 export async function criarVariacao(produtoId: string, formData: FormData) {

@@ -29,7 +29,7 @@ export default async function PainelLayout({
   }
 
   return (
-    <div className="flex min-h-dvh bg-admin-branco-creme">
+    <div className="flex h-dvh overflow-hidden bg-admin-branco-creme">
       <Sidebar nome={admin.nome} />
       <main className="min-w-0 flex-1 overflow-y-auto p-6 sm:p-8">
         {children}

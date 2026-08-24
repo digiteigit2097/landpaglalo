@@ -38,6 +38,7 @@ type CategoriaRow = {
     descricao: string | null;
     preco: number;
     ordem: number;
+    mostrar_adicionais: boolean;
     produto_variacoes: { id: string; nome: string; preco: number; ordem: number }[];
     produto_adicionais: {
       max_qtd: number;
@@ -53,7 +54,7 @@ export async function buscarCardapio(): Promise<Categoria[]> {
     .select(
       `id, nome, ordem,
        produtos (
-         id, nome, descricao, preco, ordem,
+         id, nome, descricao, preco, ordem, mostrar_adicionais,
          produto_variacoes ( id, nome, preco, ordem ),
          produto_adicionais ( max_qtd, adicionais ( id, nome, preco, ordem ) )
        )`
@@ -76,17 +77,19 @@ export async function buscarCardapio(): Promise<Categoria[]> {
         variacoes: [...p.produto_variacoes]
           .sort((a, b) => a.ordem - b.ordem)
           .map((v) => ({ id: v.id, nome: v.nome, preco: Number(v.preco) })),
-        adicionais: p.produto_adicionais
-          .filter((pa) => pa.adicionais)
-          .map((pa) => ({
-            id: pa.adicionais!.id,
-            nome: pa.adicionais!.nome,
-            preco: Number(pa.adicionais!.preco),
-            maxQtd: pa.max_qtd,
-            ordem: pa.adicionais!.ordem,
-          }))
-          .sort((a, b) => a.ordem - b.ordem)
-          .map(({ ordem: _ordem, ...a }) => a),
+        adicionais: !p.mostrar_adicionais
+          ? []
+          : p.produto_adicionais
+              .filter((pa) => pa.adicionais)
+              .map((pa) => ({
+                id: pa.adicionais!.id,
+                nome: pa.adicionais!.nome,
+                preco: Number(pa.adicionais!.preco),
+                maxQtd: pa.max_qtd,
+                ordem: pa.adicionais!.ordem,
+              }))
+              .sort((a, b) => a.ordem - b.ordem)
+              .map(({ ordem: _ordem, ...a }) => a),
       })),
   }));
 }

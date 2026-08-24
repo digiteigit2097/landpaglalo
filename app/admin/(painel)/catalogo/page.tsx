@@ -3,6 +3,7 @@ import { supabaseServer } from "@/lib/supabase-server";
 import { formatPreco } from "@/lib/menu";
 import NovaCategoriaForm from "@/components/admin/NovaCategoriaForm";
 import NovoProdutoForm from "@/components/admin/NovoProdutoForm";
+import ToggleMostrarAdicionais from "@/components/admin/ToggleMostrarAdicionais";
 import {
   alternarAtivoCategoria,
   alternarAtivoProduto,
@@ -18,6 +19,7 @@ type ProdutoRow = {
   preco: number;
   ativo: boolean;
   ordem: number;
+  mostrar_adicionais: boolean;
   produto_variacoes: { id: string }[];
 };
 
@@ -34,7 +36,7 @@ export default async function CatalogoPage() {
   const { data } = await supabase
     .from("categorias")
     .select(
-      "id, nome, ativo, ordem, produtos ( id, nome, descricao, preco, ativo, ordem, produto_variacoes ( id ) )"
+      "id, nome, ativo, ordem, produtos ( id, nome, descricao, preco, ativo, ordem, mostrar_adicionais, produto_variacoes ( id ) )"
     )
     .returns<CategoriaRow[]>();
 
@@ -171,6 +173,10 @@ export default async function CatalogoPage() {
                     >
                       Detalhes
                     </Link>
+                    <ToggleMostrarAdicionais
+                      produtoId={p.id}
+                      mostrarAdicionais={p.mostrar_adicionais}
+                    />
                     <form action={alternarAtivoProduto.bind(null, p.id, !p.ativo)}>
                       <button
                         type="submit"
