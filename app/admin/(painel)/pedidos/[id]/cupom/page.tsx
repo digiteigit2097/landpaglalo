@@ -1,10 +1,9 @@
 import { notFound } from "next/navigation";
+import { Archivo } from "next/font/google";
 import QRCode from "qrcode";
 import { supabaseServer } from "@/lib/supabase-server";
 import {
-  formatPreco,
   ADDRESS_LINE1,
-  ADDRESS_LINE2,
   PHONE_DISPLAY,
   CNPJ,
   SITE_DOMINIO,
@@ -12,6 +11,11 @@ import {
 import AutoPrint from "@/components/admin/AutoPrint";
 
 export const dynamic = "force-dynamic";
+
+const archivo = Archivo({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+});
 
 type PedidoCupom = {
   id: number;
@@ -34,6 +38,10 @@ type PedidoCupom = {
     }[];
   }[];
 };
+
+function numero(valor: number) {
+  return valor.toFixed(2).replace(".", ",");
+}
 
 export default async function CupomPedidoPage({
   params,
@@ -69,7 +77,7 @@ export default async function CupomPedidoPage({
   const qrSvg = await QRCode.toString(`https://${site}`, {
     type: "svg",
     margin: 0,
-    color: { dark: "#000000", light: "#ffffff" },
+    color: { dark: "#201e1d", light: "#ffffff" },
   });
 
   const dataPedido = new Date(pedido.criado_em).toLocaleString("pt-BR", {
@@ -85,81 +93,139 @@ export default async function CupomPedidoPage({
 
       <div
         id="area-impressao"
-        className="mx-auto w-full max-w-[320px] break-words font-mono text-[12px] leading-snug text-black print:max-w-none"
+        className={`${archivo.className} mx-auto w-full max-w-[302px] bg-white px-[15px] pb-4 pt-5 text-[12px] leading-[1.35] tabular-nums text-[#201e1d] print:max-w-none`}
       >
-        <div className="text-center">
-          <p className="text-base font-bold">DOGÃO DO LALO</p>
-          <p className="font-bold">DELIVERY</p>
-          <p>{ADDRESS_LINE1}</p>
-          <p>{ADDRESS_LINE2}</p>
-          <p>WhatsApp: {PHONE_DISPLAY}</p>
-          <p>{site}</p>
-          <p>CNPJ: {CNPJ}</p>
+        {/* Cabeçalho */}
+        <div className="flex flex-col gap-[3px]">
+          <div className="text-[9px] font-bold uppercase tracking-[.22em]">
+            Delivery · Londrina/PR
+          </div>
+          <div className="text-[27px] font-extrabold uppercase leading-[.95] tracking-[-.02em]">
+            Dogão
+            <br />
+            do Lalo
+          </div>
         </div>
 
-        <div className="my-2 border-t border-dashed border-black" />
+        <div className="my-3 h-[2px] bg-[#201e1d]" />
 
-        <p className="font-bold">
-          CLIENTE: <span className="font-normal">{pedido.cliente_nome}</span>
-        </p>
-        <p>Tel: {pedido.cliente_telefone}</p>
-        <p className="font-bold">
-          DATA: <span className="font-normal">{dataPedido}</span>
-        </p>
-
-        <div className="my-2 border-t border-dashed border-black" />
-
-        <div className="grid grid-cols-[26px_1fr_50px_56px] gap-x-1 text-[11px] font-bold uppercase">
-          <span>Qtd</span>
-          <span>Item</span>
-          <span className="text-right">Unit.</span>
-          <span className="text-right">Total</span>
+        <div className="flex flex-col gap-[2px] text-[11px] leading-[1.4]">
+          <div>{ADDRESS_LINE1}</div>
+          <div>Santa Mônica — CEP 86079-450</div>
+          <div className="mt-1 flex gap-1.5">
+            <span className="font-bold">WhatsApp</span>
+            <span>{PHONE_DISPLAY}</span>
+          </div>
+          <div className="flex gap-1.5">
+            <span className="font-bold">CNPJ</span>
+            <span>{CNPJ}</span>
+          </div>
         </div>
 
-        {pedido.pedido_itens.map((item) => {
-          const totalAdicionais = item.pedido_item_adicionais.reduce(
-            (soma, a) => soma + a.preco_unitario * a.quantidade,
-            0
-          );
-          const totalItem = item.preco_unitario * item.quantidade + totalAdicionais;
-          return (
-            <div key={item.id} className="mt-1.5">
-              <div className="grid grid-cols-[26px_1fr_50px_56px] gap-x-1 tabular-nums">
-                <span>{item.quantidade}x</span>
-                <span className="break-words">
-                  {item.produto_nome}
-                  {item.variacao ? ` (${item.variacao})` : ""}
-                </span>
-                <span className="text-right">{formatPreco(item.preco_unitario)}</span>
-                <span className="text-right">{formatPreco(totalItem)}</span>
+        <div className="mt-3 h-px bg-[#201e1d]" />
+
+        {/* Dados do pedido */}
+        <div className="grid grid-cols-[56px_1fr] gap-x-2 gap-y-[5px] py-2.5 text-[11px]">
+          <div className="pt-px text-[9px] font-bold uppercase tracking-[.14em]">Pedido</div>
+          <div className="font-bold">#{pedido.id}</div>
+          <div className="pt-px text-[9px] font-bold uppercase tracking-[.14em]">Data</div>
+          <div>{dataPedido}</div>
+          <div className="pt-px text-[9px] font-bold uppercase tracking-[.14em]">Cliente</div>
+          <div>{pedido.cliente_nome}</div>
+          <div className="pt-px text-[9px] font-bold uppercase tracking-[.14em]">Tel</div>
+          <div>{pedido.cliente_telefone}</div>
+        </div>
+
+        <div className="h-[2px] bg-[#201e1d]" />
+
+        {/* Cabeçalho da tabela de itens */}
+        <div className="grid grid-cols-[24px_1fr_60px] items-baseline gap-x-2 py-[7px] text-[9px] font-bold uppercase tracking-[.14em]">
+          <div>Qtd</div>
+          <div>Item</div>
+          <div className="text-right">Valor</div>
+        </div>
+
+        <div className="h-px bg-[#201e1d]" />
+
+        {/* Itens */}
+        <div className="flex flex-col">
+          {pedido.pedido_itens.map((item) => {
+            const totalAdicionais = item.pedido_item_adicionais.reduce(
+              (soma, a) => soma + a.preco_unitario * a.quantidade,
+              0
+            );
+            const totalItem = item.preco_unitario * item.quantidade + totalAdicionais;
+            const descricao = [item.variacao, item.observacao]
+              .filter(Boolean)
+              .join(" · ");
+
+            return (
+              <div
+                key={item.id}
+                className="grid grid-cols-[24px_1fr_60px] gap-x-2 border-b border-[#cdcbc9] py-[9px]"
+              >
+                <div className="font-bold">{item.quantidade}×</div>
+                <div>
+                  <div className="font-semibold">{item.produto_nome}</div>
+                  {descricao && (
+                    <div className="text-[10px] text-[#5c5856]">{descricao}</div>
+                  )}
+                  {item.pedido_item_adicionais.map((a) => (
+                    <div key={a.id} className="text-[10px] text-[#5c5856]">
+                      + {a.quantidade > 1 ? `${a.quantidade}x ` : ""}
+                      {a.adicional_nome}
+                    </div>
+                  ))}
+                </div>
+                <div className="text-right font-semibold">{numero(totalItem)}</div>
               </div>
-              {item.pedido_item_adicionais.map((a) => (
-                <p key={a.id} className="pl-3">
-                  + {a.quantidade > 1 ? `${a.quantidade}x ` : ""}
-                  {a.adicional_nome}
-                </p>
-              ))}
-              {item.observacao && (
-                <p className="pl-3 italic">obs: {item.observacao}</p>
-              )}
-            </div>
-          );
-        })}
-
-        <div className="my-2 border-t border-dashed border-black" />
-
-        <p className="text-base font-bold">TOTAL: {formatPreco(pedido.total)}</p>
-
-        <div className="my-3 flex justify-center [&_svg]:h-[110px] [&_svg]:w-[110px]">
-          <div dangerouslySetInnerHTML={{ __html: qrSvg }} />
+            );
+          })}
         </div>
-        <p className="text-center">Aponte a câmera para acessar nosso site</p>
-        <p className="text-center">{site}</p>
 
-        <div className="my-2 border-t border-dashed border-black" />
+        <div className="mt-2.5 h-[2px] bg-[#201e1d]" />
 
-        <p className="text-center font-bold">Obrigado pela preferência!</p>
-        <p className="text-center font-bold">DOCUMENTO NÃO FISCAL</p>
+        {/* Total */}
+        <div className="flex items-baseline justify-between py-2.5">
+          <div className="text-[11px] font-extrabold uppercase tracking-[.14em]">Total</div>
+          <div className="text-[24px] font-extrabold tracking-[-.02em]">
+            R$ {numero(pedido.total)}
+          </div>
+        </div>
+
+        <div className="h-[2px] bg-[#201e1d]" />
+
+        {/* QR do cardápio online */}
+        <div className="flex gap-3 py-3.5">
+          <div
+            className="flex h-24 w-24 flex-none items-center justify-center border-2 border-[#201e1d] p-1 [&_svg]:h-full [&_svg]:w-full"
+            dangerouslySetInnerHTML={{ __html: qrSvg }}
+          />
+          <div className="flex flex-col gap-1 pt-0.5">
+            <div className="text-[9px] font-bold uppercase tracking-[.14em]">
+              Cardápio online
+            </div>
+            <div className="text-[11px] leading-[1.35]">
+              Aponte a câmera para pedir de novo em 30 segundos.
+            </div>
+            <div className="text-[11px] font-bold">{site}</div>
+          </div>
+        </div>
+
+        <div className="h-[2px] bg-[#201e1d]" />
+
+        {/* Rodapé */}
+        <div className="flex flex-col gap-1 pt-3">
+          <div className="text-[15px] font-extrabold tracking-[-.01em]">
+            Obrigado pela preferência.
+          </div>
+          <div className="text-[10px] leading-[1.4] text-[#5c5856]">
+            Dúvidas ou trocas: fale com a gente no WhatsApp em até 24h.
+          </div>
+          <div className="mt-1.5 text-[9px] font-bold uppercase tracking-[.14em]">
+            Documento não fiscal
+          </div>
+        </div>
       </div>
     </div>
   );
