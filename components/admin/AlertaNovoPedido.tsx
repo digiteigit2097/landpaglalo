@@ -78,10 +78,6 @@ export default function AlertaNovoPedido() {
   const botaoRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    pedidoIdRef.current = pedido?.id ?? null;
-  }, [pedido]);
-
-  useEffect(() => {
     let cancelado = false;
     let supabase: Awaited<ReturnType<typeof supabaseBrowserComAuthRealtime>> | null = null;
 
@@ -99,6 +95,11 @@ export default function AlertaNovoPedido() {
               cliente_nome: string;
               total: number;
             };
+            // atualiza a ref na hora, sem esperar o efeito — se o UPDATE
+            // (com o total certo) chegar antes do React rodar o efeito,
+            // não pode achar a ref ainda com o id do pedido anterior (ou
+            // nula), senão o total fica travado em 0 pra sempre.
+            pedidoIdRef.current = novo.id;
             setPedido({ id: novo.id, nome: novo.cliente_nome });
             setTotal(Number(novo.total));
           }
