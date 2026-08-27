@@ -88,7 +88,7 @@ export default async function CupomPedidoPage({
 
   return (
     <div className="p-4">
-      <style>{`@page { size: 80mm auto; margin: 3mm; }`}</style>
+      <style>{`@page { size: 80mm auto; margin: 4mm; }`}</style>
       <AutoPrint />
 
       <div
@@ -97,10 +97,10 @@ export default async function CupomPedidoPage({
       >
         {/* Cabeçalho */}
         <div className="flex flex-col gap-[3px]">
-          <div className="text-[9px] font-bold uppercase tracking-[.22em]">
+          <div className="text-[8px] font-bold uppercase tracking-[.2em]">
             Delivery · Londrina/PR
           </div>
-          <div className="text-[27px] font-extrabold uppercase leading-[.95] tracking-[-.02em]">
+          <div className="text-[21px] font-extrabold uppercase leading-[.95] tracking-[-.02em]">
             Dogão
             <br />
             do Lalo
@@ -109,7 +109,7 @@ export default async function CupomPedidoPage({
 
         <div className="my-3 h-[2px] bg-[#201e1d]" />
 
-        <div className="flex flex-col gap-[2px] text-[11px] leading-[1.4]">
+        <div className="flex flex-col gap-[2px] text-[10px] leading-[1.4]">
           <div>{ADDRESS_LINE1}</div>
           <div>Santa Mônica — CEP 86079-450</div>
           <div className="mt-1 flex gap-1.5">
@@ -125,7 +125,7 @@ export default async function CupomPedidoPage({
         <div className="mt-3 h-px bg-[#201e1d]" />
 
         {/* Dados do pedido */}
-        <div className="grid grid-cols-[56px_1fr] gap-x-2 gap-y-[5px] py-2.5 text-[11px]">
+        <div className="grid grid-cols-[56px_1fr] gap-x-2 gap-y-[5px] py-2.5 text-[10px]">
           <div className="pt-px text-[9px] font-bold uppercase tracking-[.14em]">Pedido</div>
           <div className="font-bold">#{pedido.id}</div>
           <div className="pt-px text-[9px] font-bold uppercase tracking-[.14em]">Data</div>
@@ -166,18 +166,18 @@ export default async function CupomPedidoPage({
               >
                 <div className="font-bold">{item.quantidade}×</div>
                 <div>
-                  <div className="font-semibold">{item.produto_nome}</div>
+                  <div className="text-[11px] font-semibold">{item.produto_nome}</div>
                   {descricao && (
                     <div className="text-[10px] text-[#5c5856]">{descricao}</div>
                   )}
                   {item.pedido_item_adicionais.map((a) => (
-                    <div key={a.id} className="text-[10px] text-[#5c5856]">
+                    <div key={a.id} className="text-[10px] font-bold text-[#201e1d]">
                       + {a.quantidade > 1 ? `${a.quantidade}x ` : ""}
                       {a.adicional_nome}
                     </div>
                   ))}
                 </div>
-                <div className="text-right font-semibold">{numero(totalItem)}</div>
+                <div className="text-right text-[11px] font-semibold">{numero(totalItem)}</div>
               </div>
             );
           })}
@@ -188,7 +188,7 @@ export default async function CupomPedidoPage({
         {/* Total */}
         <div className="flex items-baseline justify-between py-2.5">
           <div className="text-[11px] font-extrabold uppercase tracking-[.14em]">Total</div>
-          <div className="text-[24px] font-extrabold tracking-[-.02em]">
+          <div className="whitespace-nowrap text-[19px] font-extrabold tracking-[-.02em]">
             R$ {numero(pedido.total)}
           </div>
         </div>
@@ -196,19 +196,19 @@ export default async function CupomPedidoPage({
         <div className="h-[2px] bg-[#201e1d]" />
 
         {/* QR do cardápio online */}
-        <div className="flex gap-3 py-3.5">
+        <div className="flex gap-2 py-3.5">
           <div
-            className="flex h-24 w-24 flex-none items-center justify-center border-2 border-[#201e1d] p-1 [&_svg]:h-full [&_svg]:w-full"
+            className="flex h-20 w-20 flex-none items-center justify-center border-2 border-[#201e1d] p-1 [&_svg]:h-full [&_svg]:w-full"
             dangerouslySetInnerHTML={{ __html: qrSvg }}
           />
-          <div className="flex flex-col gap-1 pt-0.5">
+          <div className="flex min-w-0 flex-col gap-1 pt-0.5">
             <div className="text-[9px] font-bold uppercase tracking-[.14em]">
               Cardápio online
             </div>
-            <div className="text-[11px] leading-[1.35]">
+            <div className="text-[10px] leading-[1.35]">
               Aponte a câmera para pedir de novo em 30 segundos.
             </div>
-            <div className="text-[11px] font-bold">{site}</div>
+            <div className="text-[10px] font-bold">{site}</div>
           </div>
         </div>
 
