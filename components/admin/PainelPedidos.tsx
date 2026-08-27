@@ -247,8 +247,18 @@ export default function PainelPedidos({
         .subscribe();
     });
 
+    // rede de segurança: o WebSocket do realtime pode cair sem avisar (aba
+    // em segundo plano, notebook hibernando, rede instável) e nunca mais
+    // reconectar sozinho — sem isso, a fila fica "parada" na tela mesmo com
+    // pedido novo chegando. Atualiza de tempos em tempos de qualquer jeito.
+    const intervaloAtualizacao = setInterval(() => {
+      router.refresh();
+      carregarContas();
+    }, 20000);
+
     return () => {
       cancelado = true;
+      clearInterval(intervaloAtualizacao);
       if (supabase) {
         supabase.removeAllChannels();
       }

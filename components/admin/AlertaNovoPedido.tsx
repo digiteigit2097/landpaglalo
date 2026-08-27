@@ -75,15 +75,39 @@ export default function AlertaNovoPedido() {
   const [pedido, setPedido] = useState<PedidoNovo | null>(null);
   const [total, setTotal] = useState(0);
   const pedidoIdRef = useRef<number | null>(null);
+  const maiorIdVistoRef = useRef<number>(0);
   const botaoRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     let cancelado = false;
     let supabase: Awaited<ReturnType<typeof supabaseBrowserComAuthRealtime>> | null = null;
+    let intervaloPolling: ReturnType<typeof setInterval> | null = null;
 
-    supabaseBrowserComAuthRealtime().then((cliente) => {
+    function surgiuPedido(novo: { id: number; cliente_nome: string; total: number }) {
+      // atualiza a ref na hora, sem esperar efeito — se o UPDATE (com o
+      // total certo) ou o próximo polling chegar antes do React rodar um
+      // efeito, não pode achar a ref desatualizada.
+      maiorIdVistoRef.current = Math.max(maiorIdVistoRef.current, novo.id);
+      pedidoIdRef.current = novo.id;
+      setPedido({ id: novo.id, nome: novo.cliente_nome });
+      setTotal(Number(novo.total));
+    }
+
+    supabaseBrowserComAuthRealtime().then(async (cliente) => {
       if (cancelado) return;
       supabase = cliente;
+
+      // referência de partida: só alerta pedidos que chegarem DEPOIS de
+      // abrir o painel, não a fila inteira que já existia.
+      const { data: ultimo } = await cliente
+        .from("pedidos")
+        .select("id")
+        .order("id", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (cancelado) return;
+      maiorIdVistoRef.current = ultimo?.id ?? 0;
+
       cliente
         .channel("admin-alerta-novo-pedido")
         .on(
@@ -95,13 +119,7 @@ export default function AlertaNovoPedido() {
               cliente_nome: string;
               total: number;
             };
-            // atualiza a ref na hora, sem esperar o efeito — se o UPDATE
-            // (com o total certo) chegar antes do React rodar o efeito,
-            // não pode achar a ref ainda com o id do pedido anterior (ou
-            // nula), senão o total fica travado em 0 pra sempre.
-            pedidoIdRef.current = novo.id;
-            setPedido({ id: novo.id, nome: novo.cliente_nome });
-            setTotal(Number(novo.total));
+            surgiuPedido(novo);
           }
         )
         .on(
@@ -118,10 +136,28 @@ export default function AlertaNovoPedido() {
           }
         )
         .subscribe();
+
+      // rede de segurança: o WebSocket do realtime pode cair sem avisar
+      // (aba em segundo plano, notebook hibernando, rede instável) e
+      // nunca mais reconectar sozinho — sem isso, o painel fica "vivo"
+      // na aparência mas para de saber de pedido novo. Verifica de
+      // tempos em tempos, independente do realtime estar funcionando.
+      intervaloPolling = setInterval(async () => {
+        const { data: novos } = await cliente
+          .from("pedidos")
+          .select("id, cliente_nome, total")
+          .gt("id", maiorIdVistoRef.current)
+          .order("id", { ascending: true });
+        if (novos && novos.length > 0) {
+          const maisRecente = novos[novos.length - 1];
+          surgiuPedido(maisRecente);
+        }
+      }, 15000);
     });
 
     return () => {
       cancelado = true;
+      if (intervaloPolling) clearInterval(intervaloPolling);
       if (supabase) {
         supabase.removeAllChannels();
       }
