@@ -14,6 +14,7 @@ import {
   LogOut,
   Volume2,
   VolumeX,
+  Smartphone,
   type LucideIcon,
 } from "lucide-react";
 import { logoutAdmin } from "@/app/admin/actions";
@@ -22,6 +23,7 @@ import { definirVozAlerta, vozAlertaAtiva } from "@/lib/preferencias-admin";
 const links: { href: string; label: string; Icone: LucideIcon }[] = [
   { href: "/admin", label: "Dashboard", Icone: LayoutDashboard },
   { href: "/admin/pedidos", label: "Pedidos", Icone: Receipt },
+  { href: "/admin/atendimento", label: "Atendimento (garçom)", Icone: Smartphone },
   { href: "/admin/catalogo", label: "Catálogo", Icone: UtensilsCrossed },
   { href: "/admin/qrcode", label: "QR Code", Icone: QrCode },
   { href: "/admin/cardapio-impresso", label: "Cardápio p/ imprimir", Icone: Printer },

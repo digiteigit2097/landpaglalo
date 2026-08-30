@@ -1,10 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { supabaseBrowser } from "@/lib/supabase-browser";
+
+// só rotas internas do admin podem ser destino, pra não virar um redirect
+// aberto pra qualquer URL vinda da query string.
+function rotaDestinoValida(valor: string | null) {
+  return valor && valor.startsWith("/admin/") ? valor : null;
+}
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -12,6 +18,13 @@ export default function AdminLoginPage() {
   const [senha, setSenha] = useState("");
   const [erro, setErro] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
+  const [proximaRota, setProximaRota] = useState("/admin");
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const destino = rotaDestinoValida(params.get("next"));
+    if (destino) setProximaRota(destino);
+  }, []);
 
   async function entrar(e: React.FormEvent) {
     e.preventDefault();
@@ -27,7 +40,7 @@ export default function AdminLoginPage() {
       setEnviando(false);
       return;
     }
-    router.push("/admin");
+    router.push(proximaRota);
     router.refresh();
   }
 

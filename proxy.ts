@@ -50,11 +50,21 @@ export async function proxy(request: NextRequest) {
 
   if (!user && !isLoginPage && !isRecuperacaoSenha) {
     const loginUrl = new URL("/admin/login", request.url);
+    // preserva pra onde o usuário estava indo (ex.: a página do garçom no
+    // celular) — sem isso, expirar a sessão sempre manda de volta pro
+    // painel desktop, mesmo quem só usa a página de atendimento.
+    if (pathname !== "/admin") {
+      loginUrl.searchParams.set("next", pathname);
+    }
     return NextResponse.redirect(loginUrl);
   }
 
   if (user && isLoginPage) {
-    const homeUrl = new URL("/admin", request.url);
+    const next = request.nextUrl.searchParams.get("next");
+    const homeUrl = new URL(
+      next && next.startsWith("/admin/") ? next : "/admin",
+      request.url
+    );
     return NextResponse.redirect(homeUrl);
   }
 

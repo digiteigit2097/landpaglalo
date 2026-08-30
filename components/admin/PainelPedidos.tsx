@@ -12,6 +12,11 @@ import {
   STATUS_ORDEM,
   type StatusPedido,
 } from "@/lib/pedidos-status";
+import {
+  agruparContasAbertas,
+  ehTelefoneSintetico,
+  type ContaAberta,
+} from "@/lib/contas-abertas";
 
 export type PedidoCompleto = {
   id: number;
@@ -34,13 +39,6 @@ export type PedidoCompleto = {
       preco_unitario: number;
     }[];
   }[];
-};
-
-type ContaAberta = {
-  clienteTelefone: string;
-  clienteNome: string;
-  pedidoIds: number[];
-  total: number;
 };
 
 function horario(iso: string) {
@@ -72,7 +70,9 @@ function PedidoCard({
             Pedido nº {pedido.id} · {pedido.cliente_nome}
           </p>
           <p className="text-sm text-admin-navy/60">
-            {horario(pedido.criado_em)} · {pedido.cliente_telefone}
+            {horario(pedido.criado_em)}
+            {!ehTelefoneSintetico(pedido.cliente_telefone) &&
+              ` · ${pedido.cliente_telefone}`}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -208,22 +208,7 @@ export default function PainelPedidos({
       .in("status", ["novo", "impresso", "em_preparo", "entregue"])
       .order("criado_em", { ascending: true });
 
-    const grupos = new Map<string, ContaAberta>();
-    for (const p of data ?? []) {
-      const atual = grupos.get(p.cliente_telefone);
-      if (atual) {
-        atual.pedidoIds.push(p.id);
-        atual.total += Number(p.total);
-      } else {
-        grupos.set(p.cliente_telefone, {
-          clienteTelefone: p.cliente_telefone,
-          clienteNome: p.cliente_nome,
-          pedidoIds: [p.id],
-          total: Number(p.total),
-        });
-      }
-    }
-    setContas([...grupos.values()]);
+    setContas(agruparContasAbertas(data ?? []));
   }, []);
 
   useEffect(() => {
@@ -387,8 +372,10 @@ export default function PainelPedidos({
                     {c.clienteNome}
                   </p>
                   <p className="text-sm text-admin-navy/60">
-                    {c.clienteTelefone} · pedidos{" "}
-                    {c.pedidoIds.join(", nº ")}
+                    {ehTelefoneSintetico(c.clienteTelefone)
+                      ? "Atendimento no salão"
+                      : c.clienteTelefone}{" "}
+                    · pedidos {c.pedidoIds.join(", nº ")}
                   </p>
                   <div className="mt-2 flex items-center justify-between">
                     <span className="font-display font-extrabold tabular-nums text-admin-navy">

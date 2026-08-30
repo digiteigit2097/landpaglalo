@@ -1,32 +1,14 @@
-import { redirect } from "next/navigation";
-import { supabaseServer } from "@/lib/supabase-server";
+import { exigirAdminOuRedirecionar } from "@/lib/admin-auth";
 import Sidebar from "@/components/admin/Sidebar";
 import AlertaNovoPedido from "@/components/admin/AlertaNovoPedido";
+import FilaImpressaoGarcom from "@/components/admin/FilaImpressaoGarcom";
 
 export default async function PainelLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const supabase = await supabaseServer();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/admin/login");
-  }
-
-  const { data: admin } = await supabase
-    .from("admin_usuarios")
-    .select("nome, ativo")
-    .eq("id", user.id)
-    .maybeSingle();
-
-  if (!admin || !admin.ativo) {
-    await supabase.auth.signOut();
-    redirect("/admin/login");
-  }
+  const admin = await exigirAdminOuRedirecionar();
 
   return (
     <div className="flex h-dvh overflow-hidden bg-admin-branco-creme">
@@ -35,6 +17,7 @@ export default async function PainelLayout({
         {children}
       </main>
       <AlertaNovoPedido />
+      <FilaImpressaoGarcom />
     </div>
   );
 }

@@ -3,7 +3,6 @@ import { Archivo } from "next/font/google";
 import QRCode from "qrcode";
 import { supabaseServer } from "@/lib/supabase-server";
 import { SITE_DOMINIO, numeroPreco } from "@/lib/menu";
-import { ehTelefoneSintetico } from "@/lib/contas-abertas";
 import AutoPrint from "@/components/admin/AutoPrint";
 import ReciboCabecalho from "@/components/admin/ReciboCabecalho";
 import ReciboQrCardapio from "@/components/admin/ReciboQrCardapio";
@@ -16,12 +15,11 @@ const archivo = Archivo({
   weight: ["400", "500", "600", "700", "800"],
 });
 
-type PedidoCupom = {
+type PedidoComanda = {
   id: number;
   cliente_nome: string;
-  cliente_telefone: string;
-  total: number;
   criado_em: string;
+  total: number;
   pedido_itens: {
     id: number;
     produto_nome: string;
@@ -38,29 +36,33 @@ type PedidoCupom = {
   }[];
 };
 
-export default async function CupomPedidoPage({
+export default async function CupomComandaPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ telefone: string }>;
 }) {
-  const { id } = await params;
-  const pedidoId = Number(id);
-  if (!Number.isInteger(pedidoId)) notFound();
+  const { telefone } = await params;
 
   const supabase = await supabaseServer();
-  const { data: pedido } = await supabase
+  const { data: pedidos } = await supabase
     .from("pedidos")
     .select(
-      `id, cliente_nome, cliente_telefone, total, criado_em,
+      `id, cliente_nome, criado_em, total,
        pedido_itens (
          id, produto_nome, variacao, quantidade, preco_unitario, observacao,
          pedido_item_adicionais ( id, adicional_nome, quantidade, preco_unitario )
        )`
     )
-    .eq("id", pedidoId)
-    .maybeSingle<PedidoCupom>();
+    .eq("cliente_telefone", telefone)
+    .neq("status", "cancelado")
+    .order("criado_em", { ascending: true })
+    .returns<PedidoComanda[]>();
 
-  if (!pedido) notFound();
+  if (!pedidos || pedidos.length === 0) notFound();
+
+  const clienteNome = pedidos[0].cliente_nome;
+  const totalGeral = pedidos.reduce((soma, p) => soma + Number(p.total), 0);
+  const primeiraRodada = pedidos[0].criado_em;
 
   const { data: config } = await supabase
     .from("configuracoes")
@@ -75,7 +77,7 @@ export default async function CupomPedidoPage({
     color: { dark: "#201e1d", light: "#ffffff" },
   });
 
-  const dataPedido = new Date(pedido.criado_em).toLocaleString("pt-BR", {
+  const dataAtendimento = new Date(primeiraRodada).toLocaleString("pt-BR", {
     timeZone: "America/Sao_Paulo",
     dateStyle: "short",
     timeStyle: "short",
@@ -94,20 +96,12 @@ export default async function CupomPedidoPage({
 
         <div className="mt-3 h-px bg-[#201e1d]" />
 
-        {/* Dados do pedido */}
+        {/* Dados do atendimento */}
         <div className="grid grid-cols-[56px_1fr] gap-x-2 gap-y-[5px] py-2.5 text-[10px]">
-          <div className="pt-px text-[9px] font-bold uppercase tracking-[.14em]">Pedido</div>
-          <div className="font-bold">#{pedido.id}</div>
-          <div className="pt-px text-[9px] font-bold uppercase tracking-[.14em]">Data</div>
-          <div>{dataPedido}</div>
+          <div className="pt-px text-[9px] font-bold uppercase tracking-[.14em]">Início</div>
+          <div>{dataAtendimento}</div>
           <div className="pt-px text-[9px] font-bold uppercase tracking-[.14em]">Cliente</div>
-          <div>{pedido.cliente_nome}</div>
-          {!ehTelefoneSintetico(pedido.cliente_telefone) && (
-            <>
-              <div className="pt-px text-[9px] font-bold uppercase tracking-[.14em]">Tel</div>
-              <div>{pedido.cliente_telefone}</div>
-            </>
-          )}
+          <div>{clienteNome}</div>
         </div>
 
         <div className="h-[2px] bg-[#201e1d]" />
@@ -121,41 +115,57 @@ export default async function CupomPedidoPage({
 
         <div className="h-px bg-[#201e1d]" />
 
-        {/* Itens */}
-        <div className="flex flex-col">
-          {pedido.pedido_itens.map((item) => {
-            const totalAdicionais = item.pedido_item_adicionais.reduce(
-              (soma, a) => soma + a.preco_unitario * a.quantidade,
-              0
-            );
-            const totalItem = item.preco_unitario * item.quantidade + totalAdicionais;
-            const descricao = [item.variacao, item.observacao]
-              .filter(Boolean)
-              .join(" · ");
-
-            return (
-              <div
-                key={item.id}
-                className="grid grid-cols-[24px_1fr_60px] gap-x-2 border-b border-[#cdcbc9] py-[9px]"
-              >
-                <div className="font-bold">{item.quantidade}×</div>
-                <div>
-                  <div className="text-[11px] font-semibold">{item.produto_nome}</div>
-                  {descricao && (
-                    <div className="text-[10px] text-[#5c5856]">{descricao}</div>
-                  )}
-                  {item.pedido_item_adicionais.map((a) => (
-                    <div key={a.id} className="text-[10px] font-bold text-[#201e1d]">
-                      + {a.quantidade > 1 ? `${a.quantidade}x ` : ""}
-                      {a.adicional_nome}
-                    </div>
-                  ))}
-                </div>
-                <div className="text-right text-[11px] font-semibold">{numeroPreco(totalItem)}</div>
+        {/* Rodadas */}
+        {pedidos.map((pedido, indice) => {
+          const horarioRodada = new Date(pedido.criado_em).toLocaleTimeString("pt-BR", {
+            timeZone: "America/Sao_Paulo",
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+          return (
+            <div key={pedido.id}>
+              <div className="pt-2.5 text-[9px] font-bold uppercase tracking-[.14em] text-[#5c5856]">
+                Rodada {indice + 1} · {horarioRodada}
               </div>
-            );
-          })}
-        </div>
+              <div className="flex flex-col">
+                {pedido.pedido_itens.map((item) => {
+                  const totalAdicionais = item.pedido_item_adicionais.reduce(
+                    (soma, a) => soma + a.preco_unitario * a.quantidade,
+                    0
+                  );
+                  const totalItem = item.preco_unitario * item.quantidade + totalAdicionais;
+                  const descricao = [item.variacao, item.observacao]
+                    .filter(Boolean)
+                    .join(" · ");
+
+                  return (
+                    <div
+                      key={item.id}
+                      className="grid grid-cols-[24px_1fr_60px] gap-x-2 border-b border-[#cdcbc9] py-[9px]"
+                    >
+                      <div className="font-bold">{item.quantidade}×</div>
+                      <div>
+                        <div className="text-[11px] font-semibold">{item.produto_nome}</div>
+                        {descricao && (
+                          <div className="text-[10px] text-[#5c5856]">{descricao}</div>
+                        )}
+                        {item.pedido_item_adicionais.map((a) => (
+                          <div key={a.id} className="text-[10px] font-bold text-[#201e1d]">
+                            + {a.quantidade > 1 ? `${a.quantidade}x ` : ""}
+                            {a.adicional_nome}
+                          </div>
+                        ))}
+                      </div>
+                      <div className="text-right text-[11px] font-semibold">
+                        {numeroPreco(totalItem)}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
 
         <div className="mt-2.5 h-[2px] bg-[#201e1d]" />
 
@@ -163,7 +173,7 @@ export default async function CupomPedidoPage({
         <div className="flex items-baseline justify-between py-2.5">
           <div className="text-[11px] font-extrabold uppercase tracking-[.14em]">Total</div>
           <div className="whitespace-nowrap text-[19px] font-extrabold tracking-[-.02em]">
-            R$ {numeroPreco(pedido.total)}
+            R$ {numeroPreco(totalGeral)}
           </div>
         </div>
 

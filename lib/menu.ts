@@ -226,3 +226,9 @@ export const destaques = [
 export function formatPreco(valor: number) {
   return `R$ ${valor.toFixed(2).replace(".", ",")}`;
 }
+
+// Igual formatPreco, mas sem o prefixo "R$" — usado nas colunas de valor
+// do cupom impresso, onde o "R$" já aparece só uma vez no total.
+export function numeroPreco(valor: number) {
+  return valor.toFixed(2).replace(".", ",");
+}

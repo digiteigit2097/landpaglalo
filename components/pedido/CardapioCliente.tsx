@@ -5,34 +5,12 @@ import { useEffect, useMemo, useState } from "react";
 import { supabaseAnon } from "@/lib/supabase";
 import { formatPreco } from "@/lib/menu";
 import type { Adicional, Categoria, Produto, Variacao } from "@/lib/cardapio";
+import { itemTotal, paraPayloadCriarPedido, type ItemSacola } from "@/lib/pedido-itens";
 
 const CLIENTE_KEY = "dogao-cliente";
 const SACOLA_KEY = "dogao-sacola";
 
 type Cliente = { nome: string; telefone: string };
-
-type ItemSacola = {
-  key: string;
-  produtoId: string;
-  nome: string;
-  variacao: Variacao | null;
-  adicionais: { id: string; nome: string; preco: number; quantidade: number }[];
-  quantidade: number;
-  observacao: string;
-};
-
-function precoUnitario(item: ItemSacola, base: number) {
-  const variacao = item.variacao?.preco ?? base;
-  const extras = item.adicionais.reduce(
-    (soma, a) => soma + a.preco * a.quantidade,
-    0
-  );
-  return variacao + extras;
-}
-
-function itemTotal(item: ItemSacola, base: number) {
-  return precoUnitario(item, base) * item.quantidade;
-}
 
 function telefoneValido(telefone: string) {
   return telefone.replace(/\D/g, "").length >= 10;
@@ -570,16 +548,7 @@ export default function CardapioCliente({
       const { data, error } = await supabase.rpc("criar_pedido", {
         p_cliente_nome: cliente.nome,
         p_cliente_telefone: cliente.telefone,
-        p_itens: itens.map((item) => ({
-          produto_id: item.produtoId,
-          variacao_id: item.variacao?.id ?? null,
-          quantidade: item.quantidade,
-          observacao: item.observacao || null,
-          adicionais: item.adicionais.map((a) => ({
-            adicional_id: a.id,
-            quantidade: a.quantidade,
-          })),
-        })),
+        p_itens: paraPayloadCriarPedido(itens),
       });
       if (error) throw error;
       setItens([]);
