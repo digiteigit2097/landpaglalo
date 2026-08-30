@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Printer } from "lucide-react";
+import Link from "next/link";
+import { ArrowLeft, Printer } from "lucide-react";
 import { supabaseBrowser, supabaseBrowserComAuthRealtime } from "@/lib/supabase-browser";
 import { formatPreco } from "@/lib/menu";
 import { STATUS_CLASSES, STATUS_LABEL, type StatusPedido } from "@/lib/pedidos-status";
@@ -161,6 +162,14 @@ export default function DetalheAtendimento({
 
   return (
     <div className="pb-28">
+      <Link
+        href="/admin/atendimento"
+        className="mb-2 flex min-h-9 w-fit items-center gap-1.5 rounded-full pr-2 text-sm font-semibold text-admin-dourado-escuro hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-admin-dourado"
+      >
+        <ArrowLeft aria-hidden className="h-4 w-4" strokeWidth={2.5} />
+        Atendimento
+      </Link>
+
       <h1 className="font-display text-2xl font-extrabold text-admin-navy">{clienteNome}</h1>
       <p className="mt-1 text-admin-navy/70">
         {abertos.length} {abertos.length === 1 ? "rodada em aberto" : "rodadas em aberto"}
